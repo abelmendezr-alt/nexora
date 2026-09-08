@@ -1,70 +1,77 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
 export default function Entrar() {
-  const [nombre, setNombre] = useState("");
+return (
+<main
+style={{
+minHeight: "100vh",
+background: "#050509",
+color: "white",
+display: "flex",
+flexDirection: "column",
+alignItems: "center",
+justifyContent: "center",
+padding: "30px",
+fontFamily: "Arial, sans-serif",
+}}
+>
+<div style={{ width: "100%", maxWidth: "360px" }}>
+<Link
+href="/"
+style={{
+color: "#888",
+textDecoration: "none",
+fontSize: "14px",
+}}
+>
+← Volver
+</Link>
 
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#050505",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "24px",
-        textAlign: "center",
-      }}
-    >
+    <div style={{ textAlign: "center", marginTop: "70px" }}>
+      <div
+        style={{
+          fontSize: "12px",
+          letterSpacing: "5px",
+          opacity: 0.5,
+        }}
+      >
+        BIENVENIDO AL
+      </div>
+
       <h1
         style={{
-          fontSize: "48px",
-          letterSpacing: "10px",
-          fontWeight: "300",
+          fontSize: "42px",
+          letterSpacing: "6px",
+          margin: "15px 0 10px",
         }}
       >
-        NEXORA
+        NEXO
       </h1>
 
-      <p style={{ opacity: 0.6 }}>
-        ¿Cómo quieres aparecer en el nexo?
+      <p style={{ color: "#888", marginBottom: "40px" }}>
+        Entra para comenzar a conectar.
       </p>
 
-      <input
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        placeholder="Escribe tu nombre"
+      <button
         style={{
-          marginTop: "25px",
-          padding: "15px",
-          width: "280px",
-          borderRadius: "30px",
-          border: "1px solid #444",
-          background: "#111",
-          color: "white",
-          outline: "none",
-        }}
-      />
-
-      <Link
-        href="/nexo"
-        style={{
-          marginTop: "20px",
-          padding: "14px 35px",
-          borderRadius: "30px",
-          border: "1px solid white",
-          color: "white",
-          textDecoration: "none",
-          opacity: nombre ? 1 : 0.4,
-          pointerEvents: nombre ? "auto" : "none",
+          width: "100%",
+          padding: "17px",
+          borderRadius: "14px",
+          border: "none",
+          background: "white",
+          color: "black",
+          fontSize: "16px",
+          fontWeight: "bold",
+          cursor: "pointer",
         }}
       >
-        ENTRAR AL NEXO
-      </Link>
-    </main>
-  );
+        Entrar al Nexo
+      </button>
+    </div>
+  </div>
+</main>
+
+);
 }
