@@ -597,50 +597,63 @@ return (
     }
 
     .estado-botones {
-      position: relative;
-      height: 58px;
-      margin-top: 14px;
-    }
+  position: fixed;
+  left: 50%;
+  bottom: 78px;
+  transform: translateX(-50%);
+  width: min(85%, 420px);
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+  pointer-events: none;
+}
 
-    .estado-botones button {
-      position: absolute;
-      bottom: 0;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        opacity .2s ease;
-    }
+.estado-botones button {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    opacity .2s ease;
+}
 
-    .cancelar-icono {
-      left: 0;
-      border: 1px solid #444;
-      background: rgba(255,255,255,.04);
-      color: white;
-      font-size: 17px;
-    }
+.cancelar-icono {
+  border: 1px solid #555;
+  background: rgba(10,10,10,.95);
+  color: white;
+  font-size: 18px;
+  box-shadow:
+    0 0 15px rgba(0,0,0,.5);
+}
 
-    .activar-icono {
-      right: 0;
-      border: 1px solid white;
-      background: white;
-      color: black;
-      font-size: 18px;
-      box-shadow:
-        0 0 20px rgba(255,255,255,.4);
-    }
+.activar-icono {
+  border: 1px solid white;
+  background: white;
+  color: black;
+  font-size: 19px;
+  box-shadow:
+    0 0 20px rgba(255,255,255,.5),
+    0 0 45px rgba(255,255,255,.15);
+}
 
-    .activar-icono:disabled {
-      opacity: .25;
-      box-shadow: none;
-    }
+.activar-icono:disabled {
+  opacity: .25;
+  box-shadow: none;
+  cursor: not-allowed;
+}
 
+.estado-botones button:active {
+  transform: scale(.85);
+}
     .estado-botones button:active {
       transform: scale(.88);
     }
