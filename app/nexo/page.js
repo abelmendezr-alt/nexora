@@ -609,4 +609,592 @@ export default function Nexo() {
 
         /* LÍNEAS */
 
-        .
+        .lineas {
+          position: absolute;
+
+          inset: 0;
+
+          z-index: 1;
+
+          pointer-events: none;
+        }
+
+        .lineas svg {
+          position: absolute;
+
+          inset: 0;
+
+          width: 100%;
+          height: 100%;
+        }
+
+        .lineas line {
+          stroke:
+            rgba(
+              255,
+              255,
+              255,
+              .18
+            );
+
+          stroke-width: .3;
+
+          stroke-dasharray:
+            1 2;
+
+          animation:
+            lineaPulso
+            3s
+            ease-in-out
+            infinite;
+        }
+
+        @keyframes lineaPulso {
+
+          0%,100% {
+            opacity: .2;
+          }
+
+          50% {
+            opacity: .75;
+          }
+
+        }
+
+
+        /* NODOS */
+
+        .nodo {
+          position: absolute;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          z-index: 5;
+
+          display: flex;
+
+          flex-direction: column;
+
+          align-items: center;
+
+          gap: 6px;
+
+          animation:
+            flotar
+            4s
+            ease-in-out
+            infinite;
+
+          animation-delay:
+            var(--delay);
+        }
+
+        .nodo-luz {
+          border-radius: 50%;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 11px;
+
+          transition:
+            width .5s ease,
+            height .5s ease,
+            box-shadow .5s ease;
+        }
+
+        .nodo span {
+          font-size: 9px;
+
+          opacity: .45;
+
+          white-space: nowrap;
+        }
+
+
+        /* ORIGEN */
+
+        .origen {
+          position: absolute;
+
+          left: 50%;
+          top: 50%;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          z-index: 10;
+
+          display: flex;
+
+          flex-direction: column;
+
+          align-items: center;
+
+          text-decoration: none;
+
+          color: white;
+        }
+
+        .origen-anillo {
+          width: 108px;
+          height: 108px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .25
+            );
+
+          border-radius: 50%;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          transition:
+            transform .3s ease,
+            border-color .3s ease;
+        }
+
+        .origen:hover
+        .origen-anillo {
+          transform: scale(1.08);
+
+          border-color:
+            rgba(
+              255,
+              255,
+              255,
+              .7
+            );
+        }
+
+        .origen-luz {
+          width: 68px;
+          height: 68px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 27px;
+
+          box-shadow:
+            0 0 22px white,
+            0 0 60px
+            rgba(
+              255,
+              255,
+              255,
+              .55
+            ),
+            0 0 110px
+            rgba(
+              255,
+              255,
+              255,
+              .18
+            );
+
+          animation:
+            respirarOrigen
+            3.5s
+            ease-in-out
+            infinite;
+        }
+
+        .origen span {
+          margin-top: 12px;
+
+          font-size: 8px;
+
+          letter-spacing: 4px;
+
+          opacity: .55;
+        }
+
+        @keyframes respirarOrigen {
+
+          0%,100% {
+            transform: scale(1);
+          }
+
+          50% {
+            transform: scale(1.1);
+          }
+
+        }
+
+
+        /* BOTONES LATERALES */
+
+        .acciones {
+          position: fixed;
+
+          inset: 0;
+
+          pointer-events: none;
+
+          z-index: 30;
+        }
+
+        .accion {
+          position: absolute;
+
+          width: 48px;
+          height: 48px;
+
+          border-radius: 50%;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .18
+            );
+
+          background:
+            rgba(
+              5,
+              5,
+              8,
+              .75
+            );
+
+          backdrop-filter:
+            blur(10px);
+
+          color: white;
+
+          text-decoration: none;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 20px;
+
+          opacity: .65;
+
+          pointer-events: auto;
+
+          transition:
+            transform .25s ease,
+            opacity .25s ease,
+            border-color .25s ease;
+        }
+
+        .accion:hover {
+          opacity: 1;
+
+          transform: scale(1.12);
+
+          border-color:
+            rgba(
+              255,
+              255,
+              255,
+              .6
+            );
+        }
+
+        .accion-crear {
+          left: 18px;
+          top: 90px;
+        }
+
+        .accion-explorar {
+          right: 18px;
+          top: 90px;
+        }
+
+        .accion-perfil {
+          right: 18px;
+          bottom: 25px;
+        }
+
+
+        /* FLUJO */
+
+        .flujo {
+          width:
+            min(92%, 600px);
+
+          margin:
+            10px auto 0;
+        }
+
+        .flujo-titulo {
+          display: flex;
+
+          justify-content:
+            space-between;
+
+          align-items: center;
+
+          margin-bottom: 12px;
+
+          font-size: 10px;
+
+          letter-spacing: 3px;
+
+          opacity: .5;
+        }
+
+        .flujo-titulo small {
+          letter-spacing: 0;
+
+          opacity: .6;
+        }
+
+
+        .vacio {
+          padding:
+            38px 20px;
+
+          text-align: center;
+
+          border:
+            1px solid #222;
+
+          border-radius: 20px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .018
+            );
+        }
+
+        .vacio-luz {
+          width: 42px;
+          height: 42px;
+
+          margin:
+            0 auto 17px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          box-shadow:
+            0 0 25px
+            rgba(
+              255,
+              255,
+              255,
+              .5
+            );
+        }
+
+        .vacio p {
+          font-size: 13px;
+
+          line-height: 1.6;
+
+          opacity: .4;
+        }
+
+        .vacio a {
+          display: inline-block;
+
+          margin-top: 12px;
+
+          padding:
+            10px 17px;
+
+          border:
+            1px solid #444;
+
+          border-radius: 20px;
+
+          color: white;
+
+          text-decoration: none;
+
+          font-size: 9px;
+
+          letter-spacing: 2px;
+        }
+
+
+        .lista {
+          display: flex;
+
+          flex-direction: column;
+
+          gap: 10px;
+        }
+
+        .pensamiento {
+          padding: 17px;
+
+          border:
+            1px solid #222;
+
+          border-radius: 17px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .025
+            );
+        }
+
+        .autor {
+          font-size: 10px;
+
+          opacity: .45;
+        }
+
+        .autor span {
+          margin-right: 7px;
+        }
+
+        .pensamiento p {
+          margin:
+            12px 0;
+
+          font-size: 16px;
+
+          line-height: 1.45;
+        }
+
+        .reacciones {
+          display: flex;
+
+          gap: 13px;
+
+          font-size: 10px;
+
+          opacity: .4;
+        }
+
+
+        /* ANIMACIONES */
+
+        @keyframes flotar {
+
+          0%,100% {
+            margin-top: 0;
+          }
+
+          50% {
+            margin-top: -5px;
+          }
+
+        }
+
+        @keyframes girar {
+
+          from {
+            transform:
+              translate(
+                -50%,
+                -50%
+              )
+              rotate(0deg);
+          }
+
+          to {
+            transform:
+              translate(
+                -50%,
+                -50%
+              )
+              rotate(360deg);
+          }
+
+        }
+
+
+        /* MÓVIL */
+
+        @media (max-width: 600px) {
+
+          .cosmo {
+            width: 100vw;
+            height: 100vw;
+          }
+
+          .origen-anillo {
+            width: 96px;
+            height: 96px;
+          }
+
+          .origen-luz {
+            width: 62px;
+            height: 62px;
+          }
+
+          .accion {
+            width: 44px;
+            height: 44px;
+          }
+
+          .accion-crear {
+            left: 12px;
+            top: 82px;
+          }
+
+          .accion-explorar {
+            right: 12px;
+            top: 82px;
+          }
+
+          .accion-perfil {
+            right: 12px;
+            bottom: 18px;
+          }
+
+          .flujo {
+            width: 92%;
+          }
+
+        }
+
+      `}</style>
+
+    </main>
+  );
+}
