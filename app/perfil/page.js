@@ -1,1117 +1,1189 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-export default function Nexo() {
+export default function Perfil() {
+  const [nombre, setNombre] = useState("Usuario");
   const [publicaciones, setPublicaciones] = useState([]);
-  const [destacada, setDestacada] = useState(null);
-
-  const [posicion, setPosicion] = useState({ x: 0, y: 0 });
-  const [escala, setEscala] = useState(1);
-
-  const [viajando, setViajando] = useState(false);
-  const [regresandoOrigen, setRegresandoOrigen] = useState(false);
-
-  const [conexiones, setConexiones] = useState([]);
+  const [nexos, setNexos] = useState([]);
   const [siguiendo, setSiguiendo] = useState([]);
 
-  const tocando = useRef(false);
-  const moviendo = useRef(false);
-
-  const inicio = useRef({ x: 0, y: 0 });
-  const posicionInicial = useRef({ x: 0, y: 0 });
-
-  const distanciaInicial = useRef(null);
-  const escalaInicial = useRef(1);
-
   useEffect(() => {
-    cargarDatos();
+    setNombre(
+      localStorage.getItem("nexora_nombre") ||
+        "Usuario"
+    );
+
+    setPublicaciones(
+      JSON.parse(
+        localStorage.getItem(
+          "nexora_publicaciones"
+        ) || "[]"
+      )
+    );
+
+    setNexos(
+      JSON.parse(
+        localStorage.getItem(
+          "nexora_nexos"
+        ) || "[]"
+      )
+    );
+
+    setSiguiendo(
+      JSON.parse(
+        localStorage.getItem(
+          "nexora_siguiendo"
+        ) || "[]"
+      )
+    );
   }, []);
 
-  function cargarDatos() {
-    const guardadas = JSON.parse(
-      localStorage.getItem("nexora_publicaciones") || "[]"
+  const misPublicaciones =
+    publicaciones.filter(
+      (publicacion) =>
+        publicacion.nombre === nombre
     );
 
-    const nexosGuardados = JSON.parse(
-      localStorage.getItem("nexora_nexos") || "[]"
-    );
-
-    const siguiendoGuardado = JSON.parse(
-      localStorage.getItem("nexora_siguiendo") || "[]"
-    );
-
-    setPublicaciones(guardadas);
-    setConexiones(nexosGuardados);
-    setSiguiendo(siguiendoGuardado);
-
-    if (guardadas.length > 0) {
-      seleccionarMayor(guardadas);
-    }
-  }
-
-  function seleccionarMayor(lista) {
-    const mayor = [...lista].sort((a, b) => {
-      const totalA = Object.values(a.reacciones || {}).reduce(
-        (suma, cantidad) => suma + cantidad,
-        0
-      );
-
-      const totalB = Object.values(b.reacciones || {}).reduce(
-        (suma, cantidad) => suma + cantidad,
-        0
-      );
-
-      return totalB - totalA;
-    })[0];
-
-    setDestacada(mayor);
-  }
-
-  function volverAlOrigen() {
-    setRegresandoOrigen(true);
-    setDestacada(null);
-
-    setPosicion({ x: 0, y: 0 });
-    setEscala(1);
-
-    setTimeout(() => {
-      setRegresandoOrigen(false);
-    }, 1000);
-  }
-
-  function cargarCosmoDePrueba() {
-    const pensamientos = [
-      {
-        nombre: "Luna",
-        texto: "A veces solo necesitamos detenernos.",
-        reacciones: { "♡": 18, "✦": 4, "◉": 2, "∞": 1 },
-      },
-      {
-        nombre: "Mateo",
-        texto: "Hoy quiero descubrir algo nuevo.",
-        reacciones: { "♡": 3, "✦": 16, "◉": 5, "∞": 2 },
-      },
-      {
-        nombre: "Sofía",
-        texto: "La música cambia completamente el día.",
-        reacciones: { "♡": 11, "✦": 7, "◉": 8, "∞": 4 },
-      },
-      {
-        nombre: "Diego",
-        texto: "Todo parece conectado cuando observas suficiente.",
-        reacciones: { "♡": 25, "✦": 12, "◉": 9, "∞": 8 },
-      },
-      {
-        nombre: "Valeria",
-        texto: "Quiero conocer lugares que nunca he visto.",
-        reacciones: { "♡": 6, "✦": 3, "◉": 14, "∞": 5 },
-      },
-      {
-        nombre: "Leo",
-        texto: "Hay días que simplemente se sienten diferentes.",
-        reacciones: { "♡": 8, "✦": 10, "◉": 4, "∞": 15 },
-      },
-      {
-        nombre: "Nora",
-        texto: "¿Y si estamos más conectados de lo que creemos?",
-        reacciones: { "♡": 31, "✦": 18, "◉": 12, "∞": 20 },
-      },
-      {
-        nombre: "Alex",
-        texto: "La ciudad también tiene estados de ánimo.",
-        reacciones: { "♡": 9, "✦": 5, "◉": 18, "∞": 7 },
-      },
-      {
-        nombre: "Emma",
-        texto: "Hoy el cielo se siente extraño.",
-        reacciones: { "♡": 14, "✦": 22, "◉": 6, "∞": 3 },
-      },
-      {
-        nombre: "Gael",
-        texto: "No sé qué estoy buscando, pero quiero encontrarlo.",
-        reacciones: { "♡": 19, "✦": 6, "◉": 15, "∞": 11 },
-      },
-      {
-        nombre: "Mía",
-        texto: "Una pequeña idea puede cambiar muchas cosas.",
-        reacciones: { "♡": 5, "✦": 27, "◉": 9, "∞": 13 },
-      },
-      {
-        nombre: "Ángel",
-        texto: "Quizá conectar sea la forma más simple de entender.",
-        reacciones: { "♡": 20, "✦": 14, "◉": 21, "∞": 17 },
-      },
-    ];
-
-    const nuevas = pensamientos.map((pensamiento, index) => ({
-      ...pensamiento,
-      id: Date.now() + index,
-    }));
-
-    localStorage.setItem(
-      "nexora_publicaciones",
-      JSON.stringify(nuevas)
-    );
-
-    setPublicaciones(nuevas);
-    seleccionarMayor(nuevas);
-  }
-
-  function limpiarCosmo() {
-    localStorage.removeItem("nexora_publicaciones");
-    localStorage.removeItem("nexora_nexos");
-    localStorage.removeItem("nexora_siguiendo");
-
-    setPublicaciones([]);
-    setDestacada(null);
-    setConexiones([]);
-    setSiguiendo([]);
-  }
-
-  function obtenerMiNombre() {
-    return (
-      localStorage.getItem("nexora_nombre") ||
-      "Usuario"
-    );
-  }
-
-  function reaccionar(simbolo) {
-    if (!destacada) return;
-
-    const miNombre = obtenerMiNombre();
-
-    const actualizadas = publicaciones.map((publicacion) => {
-      if (publicacion.id !== destacada.id) {
-        return publicacion;
-      }
-
-      const reaccionesActuales =
-        publicacion.reacciones || {};
-
-      const personasReaccionaron =
-        publicacion.personasReaccionaron || {};
-
-      const personasDelSimbolo =
-        personasReaccionaron[simbolo] || [];
-
-      const yaReacciono =
-        personasDelSimbolo.includes(miNombre);
-
-      if (yaReacciono) {
-        return publicacion;
-      }
-
-      return {
-        ...publicacion,
-
-        reacciones: {
-          ...reaccionesActuales,
-          [simbolo]:
-            (reaccionesActuales[simbolo] || 0) + 1,
-        },
-
-        personasReaccionaron: {
-          ...personasReaccionaron,
-
-          [simbolo]: [
-            ...personasDelSimbolo,
-            miNombre,
-          ],
-        },
-      };
-    });
-
-    setPublicaciones(actualizadas);
-
-    const nueva = actualizadas.find(
-      (publicacion) => publicacion.id === destacada.id
-    );
-
-    setDestacada(nueva);
-
-    localStorage.setItem(
-      "nexora_publicaciones",
-      JSON.stringify(actualizadas)
-    );
-  }
-
-  function seleccionarPensamiento(publicacion) {
-    if (moviendo.current) return;
-
-    setDestacada(publicacion);
-    setViajando(true);
-
-    setTimeout(() => {
-      setViajando(false);
-    }, 900);
-  }
-
-  function crearNexo() {
-    if (!destacada) return;
-
-    const miNombre = obtenerMiNombre();
-
-    if (destacada.nombre === miNombre) return;
-
-    const existe = conexiones.some(
-      (conexion) =>
-        conexion.persona === destacada.nombre
-    );
-
-    if (existe) return;
-
-    const nuevoNexo = {
-      persona: destacada.nombre,
-      pensamiento: destacada.texto,
-      fecha: Date.now(),
-    };
-
-    const actualizadas = [
-      ...conexiones,
-      nuevoNexo,
-    ];
-
-    setConexiones(actualizadas);
-
-    localStorage.setItem(
-      "nexora_nexos",
-      JSON.stringify(actualizadas)
-    );
-  }
-
-  function seguirPersona() {
-    if (!destacada) return;
-
-    const miNombre = obtenerMiNombre();
-
-    if (destacada.nombre === miNombre) return;
-
-    if (siguiendo.includes(destacada.nombre)) return;
-
-    const actualizadas = [
-      ...siguiendo,
-      destacada.nombre,
-    ];
-
-    setSiguiendo(actualizadas);
-
-    localStorage.setItem(
-      "nexora_siguiendo",
-      JSON.stringify(actualizadas)
-    );
-  }
-
-  function obtenerColor(reacciones) {
-    const colores = [];
-
-    if (reacciones["♡"] > 0) {
-      colores.push("rgba(255, 100, 180, 0.9)");
-    }
-
-    if (reacciones["✦"] > 0) {
-      colores.push("rgba(255, 210, 80, 0.9)");
-    }
-
-    if (reacciones["◉"] > 0) {
-      colores.push("rgba(80, 170, 255, 0.9)");
-    }
-
-    if (reacciones["∞"] > 0) {
-      colores.push("rgba(190, 100, 255, 0.9)");
-    }
-
-    if (colores.length === 0) {
-      return "rgba(255,255,255,0.8)";
-    }
-
-    return colores.join(", ");
-  }
-
-  function distancia(a, b) {
-    const dx = a.clientX - b.clientX;
-    const dy = a.clientY - b.clientY;
-
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  function tocarInicio(e) {
-    if (e.touches.length === 1) {
-      tocando.current = true;
-      moviendo.current = false;
-
-      inicio.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-
-      posicionInicial.current = {
-        ...posicion,
-      };
-    }
-
-    if (e.touches.length === 2) {
-      distanciaInicial.current = distancia(
-        e.touches[0],
-        e.touches[1]
-      );
-
-      escalaInicial.current = escala;
-    }
-  }
-
-  function tocarMover(e) {
-    if (
-      e.touches.length === 1 &&
-      tocando.current
-    ) {
-      const dx =
-        e.touches[0].clientX -
-        inicio.current.x;
-
-      const dy =
-        e.touches[0].clientY -
-        inicio.current.y;
-
-      if (
-        Math.abs(dx) > 6 ||
-        Math.abs(dy) > 6
-      ) {
-        moviendo.current = true;
-      }
-
-      setPosicion({
-        x: posicionInicial.current.x + dx,
-        y: posicionInicial.current.y + dy,
-      });
-    }
-
-    if (
-      e.touches.length === 2 &&
-      distanciaInicial.current
-    ) {
-      const nuevaDistancia = distancia(
-        e.touches[0],
-        e.touches[1]
-      );
-
-      const diferencia =
-        nuevaDistancia /
-        distanciaInicial.current;
-
-      let nuevaEscala =
-        escalaInicial.current *
-        diferencia;
-
-      nuevaEscala = Math.max(
-        0.5,
-        Math.min(3.5, nuevaEscala)
-      );
-
-      setEscala(nuevaEscala);
-    }
-  }
-
-  function tocarFinal() {
-    tocando.current = false;
-
-    setTimeout(() => {
-      moviendo.current = false;
-    }, 50);
-  }
-
-  const miNombre =
-    typeof window !== "undefined"
-      ? localStorage.getItem("nexora_nombre") ||
-        "Usuario"
-      : "Usuario";
-
-  const esMio =
-    destacada?.nombre === miNombre;
-
-  const yaEsNexo =
-    destacada &&
-    conexiones.some(
-      (conexion) =>
-        conexion.persona === destacada.nombre
-    );
-
-  const yaSigo =
-    destacada &&
-    siguiendo.includes(destacada.nombre);
+  const posiciones = [
+    { x: 18, y: 18 },
+    { x: 82, y: 20 },
+    { x: 20, y: 80 },
+    { x: 80, y: 82 },
+    { x: 8, y: 50 },
+    { x: 92, y: 50 },
+    { x: 35, y: 8 },
+    { x: 65, y: 8 },
+    { x: 35, y: 92 },
+    { x: 65, y: 92 },
+    { x: 12, y: 30 },
+    { x: 88, y: 70 },
+  ];
 
   return (
-    <main className="cosmo">
+    <main className="perfil">
 
-      <div className="titulo">
-        NEXORA
-      </div>
+      <header className="header">
+        <Link href="/nexo">
+          NEXORA
+        </Link>
+      </header>
 
-      <button
-        className="origen"
-        onClick={volverAlOrigen}
-      >
-        ◎
-        <span>ORIGEN</span>
-      </button>
+      <section className="cabecera">
 
-      <button
-        className="prueba"
-        onClick={cargarCosmoDePrueba}
-      >
-        ✦ LLENAR COSMO
-      </button>
-
-      <button
-        className="limpiar"
-        onClick={limpiarCosmo}
-      >
-        LIMPIAR
-      </button>
-
-      <div
-        className={`galaxia ${
-          viajando || regresandoOrigen
-            ? "viaje"
-            : ""
-        }`}
-        style={{
-          transform: `
-            translate(${posicion.x}px, ${posicion.y}px)
-            scale(${escala})
-          `,
-        }}
-        onTouchStart={tocarInicio}
-        onTouchMove={tocarMover}
-        onTouchEnd={tocarFinal}
-      >
-
-        <div
-          className={`origen-luz ${
-            regresandoOrigen
-              ? "origen-regresando"
-              : ""
-          }`}
-        >
-          <div>◎</div>
-          <span>{miNombre}</span>
+        <div className="avatar">
+          ◉
         </div>
 
-        {publicaciones.map(
-          (publicacion, index) => {
+        <h1>{nombre}</h1>
 
-            const reacciones =
-              publicacion.reacciones || {};
+        <p>
+          Conectado al nexo.
+        </p>
 
-            const total =
-              Object.values(reacciones).reduce(
-                (suma, cantidad) =>
-                  suma + cantidad,
-                0
-              );
+      </section>
 
-            const esDestacada =
-              destacada?.id === publicacion.id;
+      <section className="estadisticas">
 
-            const color =
-              obtenerColor(reacciones);
+        <div>
+          <strong>
+            {misPublicaciones.length}
+          </strong>
+          <span>Pensamientos</span>
+        </div>
+
+        <div>
+          <strong>
+            {nexos.length}
+          </strong>
+          <span>Nexos</span>
+        </div>
+
+        <div>
+          <strong>
+            {siguiendo.length}
+          </strong>
+          <span>Siguiendo</span>
+        </div>
+
+      </section>
+
+      <section className="conexion">
+
+        <div className="titulo-seccion">
+          <span>TU NEXO</span>
+
+          <small>
+            {nexos.length} conexiones
+          </small>
+        </div>
+
+        <div className="constelacion">
+
+          {/* CONEXIONES VIVAS */}
+
+          {nexos.map((nexo, index) => {
+
+            const posicion =
+              posiciones[
+                index %
+                  posiciones.length
+              ];
 
             return (
-              <button
-                key={publicacion.id}
-                className={`pensamiento ${
-                  esDestacada
-                    ? "destacada"
-                    : ""
-                }`}
-                onClick={() =>
-                  seleccionarPensamiento(
-                    publicacion
-                  )
-                }
+              <div
+                key={`conexion-${nexo.persona}-${index}`}
+                className="conexion-viva"
                 style={{
-                  top: `${
-                    12 +
-                    (index * 17) % 72
-                  }%`,
-
-                  left: `${
-                    8 +
-                    (index * 23) % 84
-                  }%`,
-
-                  width: esDestacada
-                    ? `${70 + total * 2}px`
-                    : `${35 + total * 1.5}px`,
-
-                  height: esDestacada
-                    ? `${70 + total * 2}px`
-                    : `${35 + total * 1.5}px`,
-
-                  background: "white",
-
-                  boxShadow: `
-                    0 0 15px white,
-                    0 0 35px ${color},
-                    0 0 70px ${color},
-                    0 0 130px ${color}
-                  `,
+                  "--x": `${posicion.x}%`,
+                  "--y": `${posicion.y}%`,
+                  "--delay": `${index * 0.7}s`,
                 }}
-              />
+              >
+
+                {/* Línea */}
+
+                <svg
+                  className="conexion-svg"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  <line
+                    x1="50"
+                    y1="50"
+                    x2={posicion.x}
+                    y2={posicion.y}
+                  />
+                </svg>
+
+                {/* Pulso */}
+
+                <div className="pulso" />
+
+              </div>
             );
-          }
-        )}
+          })}
 
-      </div>
+          {/* ESTRELLAS */}
 
-      {destacada && (
-        <div
-          className={`pensamiento-info ${
-            viajando
-              ? "info-viajando"
-              : ""
-          }`}
-        >
+          <div className="estrella estrella1" />
+          <div className="estrella estrella2" />
+          <div className="estrella estrella3" />
+          <div className="estrella estrella4" />
+          <div className="estrella estrella5" />
+          <div className="estrella estrella6" />
+          <div className="estrella estrella7" />
+          <div className="estrella estrella8" />
 
-          <div className="autor">
-            {destacada.nombre}
+          {/* ORIGEN */}
+
+          <div
+            className={
+              nexos.length > 0
+                ? "luz-central conectado"
+                : "luz-central"
+            }
+          >
+
+            <span>◎</span>
+
+            <small>
+              {nombre}
+            </small>
+
           </div>
 
-          <p>
-            {destacada.texto}
-          </p>
+          {/* NEXOS */}
 
-          <div className="reacciones">
+          {nexos.length === 0 ? (
 
-            {Object.entries(
-              destacada.reacciones || {}
-            ).map(
-              ([simbolo, cantidad]) => {
+            <div className="sin-nexos">
 
-                const yaReaccione =
-                  (
-                    destacada
-                      .personasReaccionaron
-                      ?.[simbolo] || []
-                  ).includes(miNombre);
+              Tu constelación todavía
+              está esperando.
+
+            </div>
+
+          ) : (
+
+            nexos.map((nexo, index) => {
+
+              const posicion =
+                posiciones[
+                  index %
+                    posiciones.length
+                ];
+
+              return (
+                <div
+                  key={`${nexo.persona}-${index}`}
+                  className="nexo-luz"
+                  style={{
+                    top:
+                      `${posicion.y}%`,
+                    left:
+                      `${posicion.x}%`,
+                    "--delay":
+                      `${index * 0.7}s`,
+                  }}
+                >
+
+                  <div className="luz">
+                    ◉
+                  </div>
+
+                  <span>
+                    {nexo.persona}
+                  </span>
+
+                </div>
+              );
+            })
+          )}
+
+        </div>
+
+      </section>
+
+      <section className="contenido">
+
+        <h2>
+          Tus pensamientos
+        </h2>
+
+        {misPublicaciones.length === 0 ? (
+
+          <div className="vacio">
+
+            Todavía no has dejado un
+            pensamiento en el Cosmo.
+
+          </div>
+
+        ) : (
+
+          <div className="pensamientos">
+
+            {misPublicaciones.map(
+              (publicacion) => {
+
+                const total =
+                  Object.values(
+                    publicacion.reacciones ||
+                    {}
+                  ).reduce(
+                    (suma, cantidad) =>
+                      suma + cantidad,
+                    0
+                  );
 
                 return (
-                  <button
-                    key={simbolo}
-                    className={
-                      yaReaccione
-                        ? "reaccion-activa"
-                        : ""
-                    }
-                    onClick={() =>
-                      reaccionar(simbolo)
-                    }
+                  <article
+                    key={publicacion.id}
+                    className="tarjeta"
                   >
-                    {simbolo} {cantidad}
-                  </button>
+
+                    <p>
+                      {publicacion.texto}
+                    </p>
+
+                    <small>
+                      {total} conexiones
+                    </small>
+
+                  </article>
                 );
               }
             )}
 
           </div>
+        )}
 
-          <small>
-            {Object.values(
-              destacada.reacciones || {}
-            ).reduce(
-              (total, cantidad) =>
-                total + cantidad,
-              0
-            )}{" "}
-            conexiones
-          </small>
-
-          {!esMio && (
-            <div className="acciones">
-
-              <button
-                onClick={seguirPersona}
-                className={
-                  yaSigo
-                    ? "accion-activa"
-                    : ""
-                }
-              >
-                {yaSigo
-                  ? "SIGUIENDO"
-                  : "SEGUIR"}
-              </button>
-
-              <button
-                onClick={crearNexo}
-                className={
-                  yaEsNexo
-                    ? "accion-activa"
-                    : ""
-                }
-              >
-                {yaEsNexo
-                  ? "EN TU NEXO"
-                  : "NEXO"}
-              </button>
-
-            </div>
-          )}
-
-        </div>
-      )}
-
-      {publicaciones.length === 0 && (
-        <div className="vacio">
-          El Cosmo está esperando
-          tu primer pensamiento.
-        </div>
-      )}
+      </section>
 
       <nav>
-        <a href="/nexo">⌂</a>
-        <a href="/explorar">✦</a>
-        <a href="/crear">＋</a>
-        <a href="/perfil">◉</a>
+
+        <Link href="/nexo">
+          ⌂
+        </Link>
+
+        <Link href="/explorar">
+          ✦
+        </Link>
+
+        <Link href="/crear">
+          ＋
+        </Link>
+
+        <Link
+          href="/perfil"
+          className="activo"
+        >
+          ◉
+        </Link>
+
       </nav>
 
       <style jsx>{`
 
-        .cosmo {
+        .perfil {
           min-height: 100vh;
+
+          background:
+            radial-gradient(
+              circle at top,
+              #252525,
+              #050505 55%
+            );
+
+          color: white;
+
+          padding-bottom: 90px;
+
+          font-family:
+            Arial,
+            sans-serif;
+
+          overflow-y: auto;
+        }
+
+        .header {
+          padding: 22px;
+
+          border-bottom:
+            1px solid #222;
+
+          letter-spacing: 5px;
+        }
+
+        .header a {
+          color: white;
+
+          text-decoration: none;
+        }
+
+        .cabecera {
+          text-align: center;
+
+          padding:
+            40px 20px 20px;
+        }
+
+        .avatar {
+          width: 100px;
+          height: 100px;
+
+          margin: auto;
+
+          border-radius: 50%;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.7
+            );
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 35px;
+
+          box-shadow:
+            0 0 35px
+            rgba(
+              255,
+              255,
+              255,
+              0.15
+            );
+        }
+
+        .cabecera h1 {
+          margin-top: 22px;
+
+          font-weight: 300;
+
+          letter-spacing: 3px;
+        }
+
+        .cabecera p {
+          opacity: 0.45;
+        }
+
+        .estadisticas {
+          width:
+            min(90%, 600px);
+
+          margin:
+            10px auto 35px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(3, 1fr);
+
+          border:
+            1px solid #222;
+
+          border-radius:
+            18px;
+
+          overflow: hidden;
+        }
+
+        .estadisticas div {
+          padding:
+            16px 8px;
+
+          text-align: center;
+
+          border-right:
+            1px solid #222;
+        }
+
+        .estadisticas div:last-child {
+          border-right: none;
+        }
+
+        .estadisticas strong {
+          display: block;
+
+          font-size: 25px;
+
+          font-weight: 300;
+        }
+
+        .estadisticas span {
+          display: block;
+
+          margin-top: 5px;
+
+          font-size: 10px;
+
+          opacity: 0.45;
+        }
+
+        .conexion,
+        .contenido {
+          width:
+            min(92%, 600px);
+
+          margin:
+            0 auto 35px;
+        }
+
+        .titulo-seccion {
+          display: flex;
+
+          justify-content:
+            space-between;
+
+          align-items: center;
+
+          margin-bottom: 12px;
+
+          letter-spacing: 3px;
+
+          font-size: 13px;
+
+          opacity: 0.7;
+        }
+
+        .titulo-seccion small {
+          letter-spacing: 0;
+
+          opacity: 0.45;
+        }
+
+        .constelacion {
+          height: 380px;
+
+          position: relative;
+
+          overflow: hidden;
+
+          border:
+            1px solid #222;
+
+          border-radius:
+            25px;
+
           background:
             radial-gradient(
               circle at center,
-              #303030 0%,
-              #101010 35%,
-              #000 75%
+              rgba(
+                255,
+                255,
+                255,
+                0.06
+              ),
+              transparent 55%
             );
-          color: white;
-          position: relative;
-          overflow: hidden;
-          font-family: Arial, sans-serif;
-          touch-action: none;
         }
 
-        .titulo {
+        /* CONEXIÓN */
+
+        .conexion-viva {
           position: absolute;
-          top: 25px;
-          left: 25px;
-          letter-spacing: 5px;
-          z-index: 10;
-        }
 
-        .origen {
-          position: absolute;
-          top: 18px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 30;
-
-          display: flex;
-          align-items: center;
-          gap: 7px;
-
-          border: 1px solid #555;
-          background: rgba(0,0,0,0.65);
-          color: white;
-          border-radius: 25px;
-          padding: 8px 13px;
-
-          font-size: 18px;
-          cursor: pointer;
-
-          backdrop-filter: blur(8px);
-
-          transition:
-            transform 0.25s ease,
-            background 0.25s ease;
-        }
-
-        .origen span {
-          font-size: 9px;
-          letter-spacing: 2px;
-        }
-
-        .origen:active {
-          transform:
-            translateX(-50%)
-            scale(0.92);
-          background:
-            rgba(255,255,255,0.15);
-        }
-
-        .prueba,
-        .limpiar {
-          position: absolute;
-          top: 22px;
-          z-index: 30;
-          border: 1px solid #444;
-          background: rgba(0,0,0,0.65);
-          color: white;
-          border-radius: 20px;
-          padding: 8px 12px;
-          font-size: 10px;
-          letter-spacing: 1px;
-          cursor: pointer;
-          backdrop-filter: blur(8px);
-        }
-
-        .prueba {
-          right: 70px;
-        }
-
-        .limpiar {
-          right: 15px;
-        }
-
-        .galaxia {
-          position: absolute;
           inset: 0;
-          transform-origin: center center;
-          transition:
-            transform 0.25s ease-out;
+
+          pointer-events: none;
+
+          z-index: 2;
         }
 
-        .galaxia.viaje {
-          transition:
-            transform 1s
-            cubic-bezier(
-              0.2,
-              0.8,
-              0.2,
-              1
-            );
-        }
-
-        .origen-luz {
+        .conexion-svg {
           position: absolute;
 
-          top: 50%;
-          left: 50%;
+          inset: 0;
 
-          transform:
-            translate(-50%, -50%);
+          width: 100%;
+          height: 100%;
+        }
 
-          width: 62px;
-          height: 62px;
+        .conexion-svg line {
+          stroke:
+            rgba(
+              255,
+              255,
+              255,
+              0.3
+            );
+
+          stroke-width: 0.35;
+
+          stroke-linecap: round;
+
+          stroke-dasharray:
+            1.5 2;
+
+          animation:
+            lineaRespira
+            4s
+            ease-in-out
+            infinite;
+
+          animation-delay:
+            var(--delay);
+        }
+
+        /* LUZ QUE VIAJA */
+
+        .pulso {
+          position: absolute;
+
+          width: 7px;
+          height: 7px;
 
           border-radius: 50%;
 
           background: white;
-          color: black;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          font-size: 24px;
-
-          z-index: 5;
 
           box-shadow:
-            0 0 20px white,
-            0 0 55px
-            rgba(255,255,255,0.7),
-            0 0 110px
-            rgba(255,255,255,0.35);
+            0 0 8px white,
+            0 0 18px white,
+            0 0 35px
+            rgba(
+              180,
+              210,
+              255,
+              0.9
+            );
 
-          animation:
-            origenRespira
-            4s
-            ease-in-out
-            infinite;
-        }
-
-        .origen-luz span {
-          position: absolute;
-
-          top: 70px;
-
-          color: white;
-
-          font-size: 10px;
-
-          letter-spacing: 2px;
-
-          white-space: nowrap;
-
-          opacity: 0.65;
-        }
-
-        .origen-luz.origen-regresando {
-          animation:
-            origenLlegada
-            1s
-            ease;
-        }
-
-        .pensamiento {
-          position: absolute;
-          transform:
-            translate(-50%, -50%);
-          border-radius: 50%;
-          border: none;
-          padding: 0;
-          cursor: pointer;
-
-          animation:
-            respirar
-            4s
-            ease-in-out
-            infinite;
-
-          transition:
-            width 1s ease,
-            height 1s ease,
-            box-shadow 1s ease,
-            transform 0.3s ease;
-
-          -webkit-tap-highlight-color:
-            transparent;
-        }
-
-        .pensamiento:active {
-          transform:
-            translate(-50%, -50%)
-            scale(0.82);
-        }
-
-        .pensamiento-info {
-          position: absolute;
           left: 50%;
-          bottom: 100px;
-          transform:
-            translateX(-50%);
-          width:
-            min(90%, 500px);
-          padding: 20px;
-          text-align: center;
-          background:
-            rgba(0,0,0,0.68);
-          border:
-            1px solid #333;
-          border-radius: 20px;
-          z-index: 10;
-          backdrop-filter:
-            blur(12px);
-          animation:
-            aparecer
-            0.7s
-            ease;
-        }
-
-        .pensamiento-info.info-viajando {
-          animation:
-            entrarPensamiento
-            0.9s
-            ease;
-        }
-
-        .autor {
-          opacity: 0.5;
-          letter-spacing: 2px;
-          font-size: 13px;
-        }
-
-        .pensamiento-info p {
-          font-size: 20px;
-          line-height: 1.4;
-        }
-
-        .reacciones {
-          margin-top: 18px;
-          display: flex;
-          justify-content: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .reacciones button {
-          background:
-            rgba(255,255,255,0.05);
-          color: white;
-          border:
-            1px solid #333;
-          border-radius: 20px;
-          padding: 8px 12px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-
-        .reaccion-activa {
-          border-color:
-            white !important;
-          background:
-            rgba(255,255,255,0.15)
-            !important;
-        }
-
-        .pensamiento-info small {
-          display: block;
-          margin-top: 12px;
-          opacity: 0.5;
-        }
-
-        .acciones {
-          display: flex;
-          justify-content: center;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .acciones button {
-          padding: 11px 18px;
-          border-radius: 25px;
-          border: 1px solid #555;
-          background:
-            rgba(255,255,255,0.04);
-          color: white;
-          font-size: 12px;
-          letter-spacing: 2px;
-          cursor: pointer;
-        }
-
-        .accion-activa {
-          background:
-            rgba(255,255,255,0.18)
-            !important;
-          border-color:
-            white !important;
-        }
-
-        .vacio {
-          position: absolute;
           top: 50%;
-          left: 50%;
+
           transform:
-            translate(-50%, -50%);
-          text-align: center;
-          opacity: 0.6;
-          width: 80%;
+            translate(
+              -50%,
+              -50%
+            );
+
+          animation:
+            viajar
+            3.2s
+            ease-in-out
+            infinite;
+
+          animation-delay:
+            var(--delay);
         }
 
-        nav {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 65px;
-          background:
-            rgba(0,0,0,0.8);
-          border-top:
-            1px solid #222;
-          display: flex;
-          justify-content:
-            space-around;
-          align-items:
-            center;
-          z-index: 20;
-        }
+        @keyframes viajar {
 
-        nav a {
-          color: white;
-          text-decoration: none;
-          font-size: 22px;
-        }
-
-        @keyframes respirar {
           0% {
-            transform:
-              translate(-50%, -50%)
-              scale(1);
+            left: 50%;
+            top: 50%;
+
+            opacity: 0;
+          }
+
+          12% {
+            opacity: 1;
           }
 
           50% {
-            transform:
-              translate(-50%, -50%)
-              scale(1.12);
+            left: var(--x);
+            top: var(--y);
+
+            opacity: 1;
+          }
+
+          62% {
+            left: var(--x);
+            top: var(--y);
+
+            opacity: 0.9;
           }
 
           100% {
-            transform:
-              translate(-50%, -50%)
-              scale(1);
+            left: 50%;
+            top: 50%;
+
+            opacity: 0;
           }
+
         }
 
-        @keyframes origenRespira {
+        @keyframes lineaRespira {
+
+          0% {
+            opacity: 0.25;
+          }
+
+          50% {
+            opacity: 0.7;
+          }
+
+          100% {
+            opacity: 0.25;
+          }
+
+        }
+
+        /* ORIGEN */
+
+        .luz-central {
+          position: absolute;
+
+          top: 50%;
+          left: 50%;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          width: 70px;
+          height: 70px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 25px;
+
+          z-index: 6;
+
+          box-shadow:
+            0 0 20px white,
+            0 0 60px
+            rgba(
+              255,
+              255,
+              255,
+              0.5
+            ),
+            0 0 110px
+            rgba(
+              255,
+              255,
+              255,
+              0.2
+            );
+
+          animation:
+            respirarOrigen
+            4s
+            ease-in-out
+            infinite;
+        }
+
+        .luz-central.conectado {
+          animation:
+            respirarConectado
+            2.5s
+            ease-in-out
+            infinite;
+        }
+
+        .luz-central small {
+          position: absolute;
+
+          top: 82px;
+
+          color: white;
+
+          font-size: 11px;
+
+          white-space: nowrap;
+
+          opacity: 0.6;
+        }
+
+        @keyframes respirarOrigen {
+
           0% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1);
           }
 
           50% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1.08);
           }
 
           100% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1);
           }
+
         }
 
-        @keyframes origenLlegada {
+        @keyframes respirarConectado {
+
           0% {
             transform:
-              translate(-50%, -50%)
-              scale(0.6);
+              translate(
+                -50%,
+                -50%
+              )
+              scale(1);
+
             box-shadow:
-              0 0 10px white;
+              0 0 20px white,
+              0 0 60px
+              rgba(
+                255,
+                255,
+                255,
+                0.5
+              );
           }
 
           50% {
             transform:
-              translate(-50%, -50%)
-              scale(1.35);
+              translate(
+                -50%,
+                -50%
+              )
+              scale(1.16);
+
             box-shadow:
-              0 0 50px white,
-              0 0 130px white;
+              0 0 30px white,
+              0 0 80px
+              rgba(
+                255,
+                255,
+                255,
+                0.8
+              ),
+              0 0 140px
+              rgba(
+                150,
+                190,
+                255,
+                0.35
+              );
           }
 
           100% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1);
           }
+
+        }
+
+        /* NEXOS */
+
+        .nexo-luz {
+          position: absolute;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          display: flex;
+
+          flex-direction: column;
+
+          align-items: center;
+
+          gap: 7px;
+
+          z-index: 5;
+
+          animation:
+            aparecer
+            0.8s
+            ease;
+        }
+
+        .nexo-luz .luz {
+          width: 34px;
+          height: 34px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 13px;
+
+          box-shadow:
+            0 0 15px white,
+            0 0 35px
+            rgba(
+              150,
+              180,
+              255,
+              0.45
+            );
+
+          animation:
+            respirarNexo
+            2.5s
+            ease-in-out
+            infinite;
+
+          animation-delay:
+            var(--delay);
+        }
+
+        @keyframes respirarNexo {
+
+          0% {
+            transform:
+              scale(1);
+
+            box-shadow:
+              0 0 15px white,
+              0 0 35px
+              rgba(
+                150,
+                180,
+                255,
+                0.35
+              );
+          }
+
+          50% {
+            transform:
+              scale(1.25);
+
+            box-shadow:
+              0 0 25px white,
+              0 0 50px
+              rgba(
+                150,
+                180,
+                255,
+                0.8
+              );
+          }
+
+          100% {
+            transform:
+              scale(1);
+          }
+
+        }
+
+        .nexo-luz span {
+          font-size: 10px;
+
+          opacity: 0.65;
+
+          max-width: 80px;
+
+          overflow: hidden;
+
+          text-overflow: ellipsis;
+
+          white-space: nowrap;
+        }
+
+        /* ESTRELLAS */
+
+        .estrella {
+          position: absolute;
+
+          width: 2px;
+          height: 2px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          box-shadow:
+            0 0 6px white;
+
+          opacity: 0.35;
+
+          z-index: 0;
+        }
+
+        .estrella1 {
+          top: 12%;
+          left: 30%;
+        }
+
+        .estrella2 {
+          top: 28%;
+          left: 65%;
+        }
+
+        .estrella3 {
+          top: 42%;
+          left: 15%;
+        }
+
+        .estrella4 {
+          top: 68%;
+          left: 72%;
+        }
+
+        .estrella5 {
+          top: 82%;
+          left: 42%;
+        }
+
+        .estrella6 {
+          top: 15%;
+          left: 82%;
+        }
+
+        .estrella7 {
+          top: 72%;
+          left: 12%;
+        }
+
+        .estrella8 {
+          top: 55%;
+          left: 88%;
+        }
+
+        /* SIN NEXOS */
+
+        .sin-nexos {
+          position: absolute;
+
+          top: 50%;
+          left: 50%;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          width: 75%;
+
+          text-align: center;
+
+          opacity: 0.35;
+
+          font-size: 14px;
+
+          line-height: 1.5;
+
+          z-index: 3;
+        }
+
+        /* PENSAMIENTOS */
+
+        .contenido h2 {
+          font-size: 13px;
+
+          font-weight: 400;
+
+          letter-spacing: 3px;
+
+          opacity: 0.65;
+
+          margin-bottom: 15px;
+        }
+
+        .pensamientos {
+          display: flex;
+
+          flex-direction: column;
+
+          gap: 10px;
+        }
+
+        .tarjeta {
+          padding: 18px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.03
+            );
+
+          border:
+            1px solid #222;
+
+          border-radius:
+            16px;
+        }
+
+        .tarjeta p {
+          font-size: 17px;
+
+          line-height: 1.4;
+
+          margin:
+            0 0 12px;
+        }
+
+        .tarjeta small {
+          opacity: 0.4;
+        }
+
+        .vacio {
+          padding: 25px;
+
+          border:
+            1px solid #222;
+
+          border-radius:
+            16px;
+
+          text-align: center;
+
+          opacity: 0.45;
+        }
+
+        /* NAVEGACIÓN */
+
+        nav {
+          position: fixed;
+
+          bottom: 0;
+
+          left: 0;
+          right: 0;
+
+          height: 65px;
+
+          background:
+            rgba(
+              0,
+              0,
+              0,
+              0.9
+            );
+
+          border-top:
+            1px solid #222;
+
+          display: flex;
+
+          justify-content:
+            space-around;
+
+          align-items:
+            center;
+
+          z-index: 20;
+        }
+
+        nav a {
+          color: white;
+
+          text-decoration: none;
+
+          font-size: 22px;
+
+          opacity: 0.7;
+        }
+
+        nav a.activo {
+          opacity: 1;
+
+          text-shadow:
+            0 0 12px white;
         }
 
         @keyframes aparecer {
+
           from {
             opacity: 0;
+
             transform:
-              translateX(-50%)
-              translateY(15px);
+              translate(
+                -50%,
+                -50%
+              )
+              scale(0.7);
           }
 
           to {
             opacity: 1;
-            transform:
-              translateX(-50%)
-              translateY(0);
-          }
-        }
 
-        @keyframes entrarPensamiento {
-          0% {
-            opacity: 0;
             transform:
-              translateX(-50%)
-              translateY(30px)
-              scale(0.85);
-          }
-
-          100% {
-            opacity: 1;
-            transform:
-              translateX(-50%)
-              translateY(0)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1);
           }
+
         }
 
       `}</style>
