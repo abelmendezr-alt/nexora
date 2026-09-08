@@ -5,15 +5,30 @@ import { useState } from "react";
 export default function Nexo() {
   const [publicando, setPublicando] = useState(false);
   const [texto, setTexto] = useState("");
-  const [publicacion, setPublicacion] = useState("");
-  const [liked, setLiked] = useState(false);
+  const [publicaciones, setPublicaciones] = useState([]);
 
   function publicar() {
     if (texto.trim() === "") return;
 
-    setPublicacion(texto);
+    const nuevaPublicacion = {
+      id: Date.now(),
+      texto: texto,
+      liked: false,
+    };
+
+    setPublicaciones([nuevaPublicacion, ...publicaciones]);
     setTexto("");
     setPublicando(false);
+  }
+
+  function darLike(id) {
+    setPublicaciones(
+      publicaciones.map((publicacion) =>
+        publicacion.id === id
+          ? { ...publicacion, liked: !publicacion.liked }
+          : publicacion
+      )
+    );
   }
 
   return (
@@ -37,25 +52,28 @@ export default function Nexo() {
           <br />
 
           <button onClick={publicar}>Publicar</button>
-          <button onClick={() => setPublicando(false)}>Cancelar</button>
+          <button onClick={() => setPublicando(false)}>
+            Cancelar
+          </button>
         </section>
       )}
 
-      {publicacion && (
-        <article>
+      {publicaciones.map((publicacion) => (
+        <article key={publicacion.id}>
           <small>NEXORA · ahora</small>
-          <p>{publicacion}</p>
 
-         <div>
-  <button onClick={() => setLiked(!liked)}>
-    {liked ? "♥" : "♡"} {liked ? "1" : "0"}
-  </button>
+          <p>{publicacion.texto}</p>
 
-  <button>Comentar</button>
-  <button>Compartir</button>
-</div>
+          <div>
+            <button onClick={() => darLike(publicacion.id)}>
+              {publicacion.liked ? "♥ 1" : "♡ 0"}
+            </button>
+
+            <button>Comentar</button>
+            <button>Compartir</button>
+          </div>
         </article>
-      )}
+      ))}
 
       <nav>
         <button>Inicio</button>
