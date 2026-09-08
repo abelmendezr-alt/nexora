@@ -236,3 +236,12 @@ export default function Nexo() {
     ◉
   </a>
 </nav>
+</section>
+
+      <nav>
+        ...
+      </nav>
+
+    </main>
+  );
+}
