@@ -211,7 +211,7 @@ export default function Nexo() {
 
       </section>
 
-      nav className="nav">
+      <nav className="nav">
 
         <Link
           href="/nexo"
