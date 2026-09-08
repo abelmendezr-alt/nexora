@@ -10,6 +10,8 @@ export default function Nexo() {
   const [escala, setEscala] = useState(1);
 
   const [viajando, setViajando] = useState(false);
+  const [conexiones, setConexiones] = useState([]);
+  const [siguiendo, setSiguiendo] = useState([]);
 
   const tocando = useRef(false);
   const moviendo = useRef(false);
@@ -25,7 +27,17 @@ export default function Nexo() {
       localStorage.getItem("nexora_publicaciones") || "[]"
     );
 
+    const nexosGuardados = JSON.parse(
+      localStorage.getItem("nexora_nexos") || "[]"
+    );
+
+    const siguiendoGuardado = JSON.parse(
+      localStorage.getItem("nexora_siguiendo") || "[]"
+    );
+
     setPublicaciones(guardadas);
+    setConexiones(nexosGuardados);
+    setSiguiendo(siguiendoGuardado);
 
     if (guardadas.length > 0) {
       const mayor = [...guardadas].sort((a, b) => {
@@ -46,20 +58,55 @@ export default function Nexo() {
     }
   }, []);
 
+  function obtenerMiNombre() {
+    return (
+      localStorage.getItem("nexora_nombre") ||
+      "Usuario"
+    );
+  }
+
   function reaccionar(simbolo) {
     if (!destacada) return;
+
+    const miNombre = obtenerMiNombre();
 
     const actualizadas = publicaciones.map((publicacion) => {
       if (publicacion.id !== destacada.id) {
         return publicacion;
       }
 
+      const reaccionesActuales =
+        publicacion.reacciones || {};
+
+      const personasReaccionaron =
+        publicacion.personasReaccionaron || {};
+
+      const personasDelSimbolo =
+        personasReaccionaron[simbolo] || [];
+
+      const yaReacciono =
+        personasDelSimbolo.includes(miNombre);
+
+      if (yaReacciono) {
+        return publicacion;
+      }
+
       return {
         ...publicacion,
+
         reacciones: {
-          ...publicacion.reacciones,
+          ...reaccionesActuales,
           [simbolo]:
-            (publicacion.reacciones?.[simbolo] || 0) + 1,
+            (reaccionesActuales[simbolo] || 0) + 1,
+        },
+
+        personasReaccionaron: {
+          ...personasReaccionaron,
+
+          [simbolo]: [
+            ...personasDelSimbolo,
+            miNombre,
+          ],
         },
       };
     });
@@ -67,7 +114,8 @@ export default function Nexo() {
     setPublicaciones(actualizadas);
 
     const nueva = actualizadas.find(
-      (publicacion) => publicacion.id === destacada.id
+      (publicacion) =>
+        publicacion.id === destacada.id
     );
 
     setDestacada(nueva);
@@ -84,41 +132,116 @@ export default function Nexo() {
     setDestacada(publicacion);
     setViajando(true);
 
-    /*
-      Pequeño viaje visual hacia el pensamiento.
-      Después regresamos a una escala cómoda
-      para poder seguir explorando.
-    */
     setTimeout(() => {
       setViajando(false);
     }, 900);
   }
 
+  function crearNexo() {
+    if (!destacada) return;
+
+    const miNombre = obtenerMiNombre();
+
+    if (destacada.nombre === miNombre) {
+      return;
+    }
+
+    const existe = conexiones.some(
+      (conexion) =>
+        conexion.persona === destacada.nombre
+    );
+
+    if (existe) return;
+
+    const nuevoNexo = {
+      persona: destacada.nombre,
+      pensamiento: destacada.texto,
+      fecha: Date.now(),
+    };
+
+    const actualizadas = [
+      ...conexiones,
+      nuevoNexo,
+    ];
+
+    setConexiones(actualizadas);
+
+    localStorage.setItem(
+      "nexora_nexos",
+      JSON.stringify(actualizadas)
+    );
+  }
+
+  function seguirPersona() {
+    if (!destacada) return;
+
+    const miNombre = obtenerMiNombre();
+
+    if (destacada.nombre === miNombre) {
+      return;
+    }
+
+    if (siguiendo.includes(destacada.nombre)) {
+      return;
+    }
+
+    const actualizadas = [
+      ...siguiendo,
+      destacada.nombre,
+    ];
+
+    setSiguiendo(actualizadas);
+
+    localStorage.setItem(
+      "nexora_siguiendo",
+      JSON.stringify(actualizadas)
+    );
+  }
+
   function obtenerColor(reacciones) {
+    const colores = [];
+
     if (reacciones["♡"] > 0) {
-      return "rgba(255, 100, 180, 0.9)";
+      colores.push(
+        "rgba(255, 100, 180, 0.9)"
+      );
     }
 
     if (reacciones["✦"] > 0) {
-      return "rgba(255, 210, 80, 0.9)";
+      colores.push(
+        "rgba(255, 210, 80, 0.9)"
+      );
     }
 
     if (reacciones["◉"] > 0) {
-      return "rgba(80, 170, 255, 0.9)";
+      colores.push(
+        "rgba(80, 170, 255, 0.9)"
+      );
     }
 
     if (reacciones["∞"] > 0) {
-      return "rgba(190, 100, 255, 0.9)";
+      colores.push(
+        "rgba(190, 100, 255, 0.9)"
+      );
     }
 
-    return "rgba(255,255,255,0.8)";
+    if (colores.length === 0) {
+      return "rgba(255,255,255,0.8)";
+    }
+
+    return colores.join(", ");
   }
 
   function distancia(a, b) {
-    const dx = a.clientX - b.clientX;
-    const dy = a.clientY - b.clientY;
+    const dx =
+      a.clientX - b.clientX;
 
-    return Math.sqrt(dx * dx + dy * dy);
+    const dy =
+      a.clientY - b.clientY;
+
+    return Math.sqrt(
+      dx * dx + dy * dy
+    );
   }
 
   function tocarInicio(e) {
@@ -137,30 +260,45 @@ export default function Nexo() {
     }
 
     if (e.touches.length === 2) {
-      distanciaInicial.current = distancia(
-        e.touches[0],
-        e.touches[1]
-      );
+      distanciaInicial.current =
+        distancia(
+          e.touches[0],
+          e.touches[1]
+        );
 
-      escalaInicial.current = escala;
+      escalaInicial.current =
+        escala;
     }
   }
 
   function tocarMover(e) {
-    if (e.touches.length === 1 && tocando.current) {
+    if (
+      e.touches.length === 1 &&
+      tocando.current
+    ) {
       const dx =
-        e.touches[0].clientX - inicio.current.x;
+        e.touches[0].clientX -
+        inicio.current.x;
 
       const dy =
-        e.touches[0].clientY - inicio.current.y;
+        e.touches[0].clientY -
+        inicio.current.y;
 
-      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+      if (
+        Math.abs(dx) > 6 ||
+        Math.abs(dy) > 6
+      ) {
         moviendo.current = true;
       }
 
       setPosicion({
-        x: posicionInicial.current.x + dx,
-        y: posicionInicial.current.y + dy,
+        x:
+          posicionInicial.current.x +
+          dx,
+
+        y:
+          posicionInicial.current.y +
+          dy,
       });
     }
 
@@ -168,16 +306,19 @@ export default function Nexo() {
       e.touches.length === 2 &&
       distanciaInicial.current
     ) {
-      const nuevaDistancia = distancia(
-        e.touches[0],
-        e.touches[1]
-      );
+      const nuevaDistancia =
+        distancia(
+          e.touches[0],
+          e.touches[1]
+        );
 
       const diferencia =
-        nuevaDistancia / distanciaInicial.current;
+        nuevaDistancia /
+        distanciaInicial.current;
 
       let nuevaEscala =
-        escalaInicial.current * diferencia;
+        escalaInicial.current *
+        diferencia;
 
       nuevaEscala = Math.max(
         0.5,
@@ -196,12 +337,41 @@ export default function Nexo() {
     }, 50);
   }
 
+  const miNombre =
+    typeof window !== "undefined"
+      ? localStorage.getItem(
+          "nexora_nombre"
+        ) || "Usuario"
+      : "Usuario";
+
+  const esMio =
+    destacada?.nombre === miNombre;
+
+  const yaEsNexo =
+    destacada &&
+    conexiones.some(
+      (conexion) =>
+        conexion.persona ===
+        destacada.nombre
+    );
+
+  const yaSigo =
+    destacada &&
+    siguiendo.includes(
+      destacada.nombre
+    );
+
   return (
     <main className="cosmo">
-      <div className="titulo">NEXORA</div>
+
+      <div className="titulo">
+        NEXORA
+      </div>
 
       <div
-        className={`galaxia ${viajando ? "viaje" : ""}`}
+        className={`galaxia ${
+          viajando ? "viaje" : ""
+        }`}
         style={{
           transform: `
             translate(${posicion.x}px, ${posicion.y}px)
@@ -212,89 +382,161 @@ export default function Nexo() {
         onTouchMove={tocarMover}
         onTouchEnd={tocarFinal}
       >
-        {publicaciones.map((publicacion, index) => {
-          const reacciones =
-            publicacion.reacciones || {};
 
-          const total = Object.values(
-            reacciones
-          ).reduce(
-            (suma, cantidad) =>
-              suma + cantidad,
-            0
-          );
+        {publicaciones.map(
+          (publicacion, index) => {
 
-          const esDestacada =
-            destacada?.id === publicacion.id;
+            const reacciones =
+              publicacion.reacciones ||
+              {};
 
-          const color =
-            obtenerColor(reacciones);
+            const total =
+              Object.values(
+                reacciones
+              ).reduce(
+                (suma, cantidad) =>
+                  suma + cantidad,
+                0
+              );
 
-          return (
-            <button
-              key={publicacion.id}
-              className={`pensamiento ${
-                esDestacada ? "destacada" : ""
-              }`}
-              onClick={() =>
-                seleccionarPensamiento(publicacion)
-              }
-              style={{
-                top: `${25 + (index * 17) % 55}%`,
-                left: `${20 + (index * 23) % 60}%`,
+            const esDestacada =
+              destacada?.id ===
+              publicacion.id;
 
-                width: esDestacada
-                  ? `${70 + total * 4}px`
-                  : `${35 + total * 4}px`,
+            const color =
+              obtenerColor(
+                reacciones
+              );
 
-                height: esDestacada
-                  ? `${70 + total * 4}px`
-                  : `${35 + total * 4}px`,
+            return (
+              <button
+                key={
+                  publicacion.id
+                }
+                className={`pensamiento ${
+                  esDestacada
+                    ? "destacada"
+                    : ""
+                }`}
+                onClick={() =>
+                  seleccionarPensamiento(
+                    publicacion
+                  )
+                }
+                style={{
+                  top: `${
+                    25 +
+                    (index * 17) % 55
+                  }%`,
 
-                background: "white",
+                  left: `${
+                    20 +
+                    (index * 23) % 60
+                  }%`,
 
-                boxShadow: `
-                  0 0 15px white,
-                  0 0 35px ${color},
-                  0 0 70px ${color},
-                  0 0 130px ${color}
-                `,
-              }}
-            />
-          );
-        })}
+                  width: esDestacada
+                    ? `${
+                        70 +
+                        total * 4
+                      }px`
+                    : `${
+                        35 +
+                        total * 4
+                      }px`,
+
+                  height: esDestacada
+                    ? `${
+                        70 +
+                        total * 4
+                      }px`
+                    : `${
+                        35 +
+                        total * 4
+                      }px`,
+
+                  background:
+                    "white",
+
+                  boxShadow: `
+                    0 0 15px white,
+                    0 0 35px ${color},
+                    0 0 70px ${color},
+                    0 0 130px ${color}
+                  `,
+                }}
+              />
+            );
+          }
+        )}
+
       </div>
 
       {destacada && (
         <div
           className={`pensamiento-info ${
-            viajando ? "info-viajando" : ""
+            viajando
+              ? "info-viajando"
+              : ""
           }`}
         >
+
           <div className="autor">
             {destacada.nombre}
           </div>
 
-          <p>{destacada.texto}</p>
+          <p>
+            {destacada.texto}
+          </p>
 
           <div className="reacciones">
+
             {Object.entries(
-              destacada.reacciones || {}
-            ).map(([simbolo, cantidad]) => (
-              <button
-                key={simbolo}
-                onClick={() =>
-                  reaccionar(simbolo)
-                }
-              >
-                {simbolo} {cantidad}
-              </button>
-            ))}
+              destacada.reacciones ||
+              {}
+            ).map(
+              ([
+                simbolo,
+                cantidad,
+              ]) => {
+
+                const yaReaccione =
+                  (
+                    destacada
+                      .personasReaccionaron
+                      ?.[
+                        simbolo
+                      ] || []
+                  ).includes(
+                    miNombre
+                  );
+
+                return (
+                  <button
+                    key={simbolo}
+                    className={
+                      yaReaccione
+                        ? "reaccion-activa"
+                        : ""
+                    }
+                    onClick={() =>
+                      reaccionar(
+                        simbolo
+                      )
+                    }
+                  >
+                    {simbolo}{" "}
+                    {cantidad}
+                  </button>
+                );
+              }
+            )}
+
           </div>
 
           <small>
             {Object.values(
-              destacada.reacciones || {}
+              destacada.reacciones ||
+              {}
             ).reduce(
               (total, cantidad) =>
                 total + cantidad,
@@ -302,73 +544,154 @@ export default function Nexo() {
             )}{" "}
             conexiones
           </small>
+
+          {!esMio && (
+            <div className="acciones">
+
+              <button
+                onClick={
+                  seguirPersona
+                }
+                className={
+                  yaSigo
+                    ? "accion-activa"
+                    : ""
+                }
+              >
+                {yaSigo
+                  ? "SIGUIENDO"
+                  : "SEGUIR"}
+              </button>
+
+              <button
+                onClick={
+                  crearNexo
+                }
+                className={
+                  yaEsNexo
+                    ? "accion-activa"
+                    : ""
+                }
+              >
+                {yaEsNexo
+                  ? "EN TU NEXO"
+                  : "NEXO"}
+              </button>
+
+            </div>
+          )}
+
         </div>
       )}
 
       {publicaciones.length === 0 && (
         <div className="vacio">
-          El Cosmo está esperando tu primer pensamiento.
+          El Cosmo está esperando
+          tu primer pensamiento.
         </div>
       )}
 
       <nav>
-        <a href="/nexo">⌂</a>
-        <a href="/explorar">✦</a>
-        <a href="/crear">＋</a>
-        <a href="/perfil">◉</a>
+
+        <a href="/nexo">
+          ⌂
+        </a>
+
+        <a href="/explorar">
+          ✦
+        </a>
+
+        <a href="/crear">
+          ＋
+        </a>
+
+        <a href="/perfil">
+          ◉
+        </a>
+
       </nav>
 
       <style jsx>{`
+
         .cosmo {
           min-height: 100vh;
-          background: radial-gradient(
-            circle at center,
-            #303030 0%,
-            #101010 35%,
-            #000 75%
-          );
+
+          background:
+            radial-gradient(
+              circle at center,
+              #303030 0%,
+              #101010 35%,
+              #000 75%
+            );
+
           color: white;
+
           position: relative;
+
           overflow: hidden;
-          font-family: Arial, sans-serif;
+
+          font-family:
+            Arial,
+            sans-serif;
+
           touch-action: none;
         }
 
         .titulo {
           position: absolute;
+
           top: 25px;
           left: 25px;
+
           letter-spacing: 5px;
+
           z-index: 10;
         }
 
         .galaxia {
           position: absolute;
+
           inset: 0;
-          transform-origin: center center;
+
+          transform-origin:
+            center center;
+
           transition:
-            transform 0.25s ease-out;
+            transform 0.25s
+            ease-out;
         }
 
         .galaxia.viaje {
           transition:
             transform 0.9s
-            cubic-bezier(0.2, 0.8, 0.2, 1);
+            cubic-bezier(
+              0.2,
+              0.8,
+              0.2,
+              1
+            );
         }
 
         .pensamiento {
           position: absolute;
+
           transform:
-            translate(-50%, -50%);
+            translate(
+              -50%,
+              -50%
+            );
 
           border-radius: 50%;
+
           border: none;
+
           padding: 0;
 
           cursor: pointer;
 
           animation:
-            respirar 4s
+            respirar
+            4s
             ease-in-out
             infinite;
 
@@ -384,13 +707,18 @@ export default function Nexo() {
 
         .pensamiento:active {
           transform:
-            translate(-50%, -50%)
+            translate(
+              -50%,
+              -50%
+            )
             scale(0.82);
         }
 
         .pensamiento-info {
           position: absolute;
+
           left: 50%;
+
           bottom: 100px;
 
           transform:
@@ -404,7 +732,12 @@ export default function Nexo() {
           text-align: center;
 
           background:
-            rgba(0, 0, 0, 0.68);
+            rgba(
+              0,
+              0,
+              0,
+              0.68
+            );
 
           border:
             1px solid #333;
@@ -418,7 +751,9 @@ export default function Nexo() {
             blur(12px);
 
           animation:
-            aparecer 0.7s ease;
+            aparecer
+            0.7s
+            ease;
         }
 
         .pensamiento-info.info-viajando {
@@ -430,12 +765,15 @@ export default function Nexo() {
 
         .autor {
           opacity: 0.5;
+
           letter-spacing: 2px;
+
           font-size: 13px;
         }
 
         .pensamiento-info p {
           font-size: 20px;
+
           line-height: 1.4;
         }
 
@@ -443,14 +781,23 @@ export default function Nexo() {
           margin-top: 18px;
 
           display: flex;
-          justify-content: center;
+
+          justify-content:
+            center;
 
           gap: 8px;
+
+          flex-wrap: wrap;
         }
 
         .reacciones button {
           background:
-            rgba(255, 255, 255, 0.05);
+            rgba(
+              255,
+              255,
+              255,
+              0.05
+            );
 
           color: white;
 
@@ -468,8 +815,10 @@ export default function Nexo() {
           font-size: 16px;
 
           transition:
-            transform 0.2s ease,
-            background 0.2s ease;
+            transform
+            0.2s ease,
+            background
+            0.2s ease;
         }
 
         .reacciones button:active {
@@ -477,13 +826,95 @@ export default function Nexo() {
             scale(1.15);
 
           background:
-            rgba(255, 255, 255, 0.18);
+            rgba(
+              255,
+              255,
+              255,
+              0.18
+            );
+        }
+
+        .reaccion-activa {
+          border-color:
+            white !important;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.15
+            ) !important;
         }
 
         .pensamiento-info small {
           display: block;
+
           margin-top: 12px;
+
           opacity: 0.5;
+        }
+
+        .acciones {
+          display: flex;
+
+          justify-content:
+            center;
+
+          gap: 10px;
+
+          margin-top: 20px;
+        }
+
+        .acciones button {
+          padding:
+            11px 18px;
+
+          border-radius:
+            25px;
+
+          border:
+            1px solid #555;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.04
+            );
+
+          color: white;
+
+          font-size: 12px;
+
+          letter-spacing: 2px;
+
+          cursor: pointer;
+
+          transition:
+            transform
+            0.2s ease,
+            background
+            0.2s ease;
+        }
+
+        .acciones button:active {
+          transform:
+            scale(0.95);
+        }
+
+        .accion-activa {
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.18
+            ) !important;
+
+          border-color:
+            white !important;
         }
 
         .vacio {
@@ -493,7 +924,10 @@ export default function Nexo() {
           left: 50%;
 
           transform:
-            translate(-50%, -50%);
+            translate(
+              -50%,
+              -50%
+            );
 
           text-align: center;
 
@@ -506,13 +940,19 @@ export default function Nexo() {
           position: fixed;
 
           bottom: 0;
+
           left: 0;
           right: 0;
 
           height: 65px;
 
           background:
-            rgba(0, 0, 0, 0.8);
+            rgba(
+              0,
+              0,
+              0,
+              0.8
+            );
 
           border-top:
             1px solid #222;
@@ -530,33 +970,48 @@ export default function Nexo() {
 
         nav a {
           color: white;
+
           text-decoration: none;
+
           font-size: 22px;
         }
 
         @keyframes respirar {
+
           0% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1);
           }
 
           50% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1.12);
           }
 
           100% {
             transform:
-              translate(-50%, -50%)
+              translate(
+                -50%,
+                -50%
+              )
               scale(1);
           }
+
         }
 
         @keyframes aparecer {
+
           from {
             opacity: 0;
+
             transform:
               translateX(-50%)
               translateY(15px);
@@ -564,15 +1019,19 @@ export default function Nexo() {
 
           to {
             opacity: 1;
+
             transform:
               translateX(-50%)
               translateY(0);
           }
+
         }
 
         @keyframes entrarPensamiento {
+
           0% {
             opacity: 0;
+
             transform:
               translateX(-50%)
               translateY(30px)
@@ -581,13 +1040,17 @@ export default function Nexo() {
 
           100% {
             opacity: 1;
+
             transform:
               translateX(-50%)
               translateY(0)
               scale(1);
           }
+
         }
+
       `}</style>
+
     </main>
   );
 }
