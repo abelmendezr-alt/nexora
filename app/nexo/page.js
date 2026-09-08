@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function Nexo() {
   const [publicaciones, setPublicaciones] = useState([]);
   const [destacada, setDestacada] = useState(null);
+  const [zoom, setZoom] = useState(false);
 
   useEffect(() => {
     const guardadas = JSON.parse(
@@ -29,11 +30,15 @@ export default function Nexo() {
       })[0];
 
       setDestacada(mayor);
+
+      setTimeout(() => {
+        setZoom(true);
+      }, 800);
     }
   }, []);
 
   return (
-    <main className="cosmo">
+    <main className={`cosmo ${zoom ? "zoom-activo" : ""}`}>
       <div className="titulo">NEXORA</div>
 
       <div className="galaxia">
@@ -42,7 +47,8 @@ export default function Nexo() {
             publicacion.reacciones || {}
           ).reduce((total, cantidad) => total + cantidad, 0);
 
-          const esDestacada = destacada?.id === publicacion.id;
+          const esDestacada =
+            destacada?.id === publicacion.id;
 
           return (
             <div
@@ -60,7 +66,6 @@ export default function Nexo() {
                   ? `${70 + reacciones * 4}px`
                   : `${35 + reacciones * 4}px`,
               }}
-              title={publicacion.texto}
             />
           );
         })}
@@ -68,13 +73,18 @@ export default function Nexo() {
 
       {destacada && (
         <div className="pensamiento-info">
-          <div>{destacada.nombre}</div>
+          <div className="autor">
+            {destacada.nombre}
+          </div>
 
           <p>{destacada.texto}</p>
 
           <small>
-            {Object.values(destacada.reacciones || {}).reduce(
-              (total, cantidad) => total + cantidad,
+            {Object.values(
+              destacada.reacciones || {}
+            ).reduce(
+              (total, cantidad) =>
+                total + cantidad,
               0
             )}{" "}
             conexiones
@@ -115,12 +125,17 @@ export default function Nexo() {
           top: 25px;
           left: 25px;
           letter-spacing: 5px;
-          z-index: 5;
+          z-index: 10;
         }
 
         .galaxia {
           position: absolute;
           inset: 0;
+          transition: transform 3s ease;
+        }
+
+        .zoom-activo .galaxia {
+          transform: scale(2.2);
         }
 
         .pensamiento {
@@ -138,7 +153,7 @@ export default function Nexo() {
           box-shadow:
             0 0 30px white,
             0 0 80px rgba(255, 255, 255, 0.9),
-            0 0 150px rgba(255, 255, 255, 0.5);
+            0 0 160px rgba(255, 255, 255, 0.5);
         }
 
         .pensamiento-info {
@@ -149,14 +164,23 @@ export default function Nexo() {
           width: min(90%, 500px);
           padding: 20px;
           text-align: center;
-          background: rgba(0, 0, 0, 0.6);
+          background: rgba(0, 0, 0, 0.65);
           border: 1px solid #333;
           border-radius: 20px;
-          z-index: 5;
+          z-index: 10;
+          opacity: 0;
+          animation: aparecer 1.5s ease 2s forwards;
+        }
+
+        .autor {
+          opacity: 0.5;
+          letter-spacing: 2px;
+          font-size: 13px;
         }
 
         .pensamiento-info p {
-          font-size: 19px;
+          font-size: 20px;
+          line-height: 1.4;
         }
 
         .pensamiento-info small {
@@ -184,7 +208,7 @@ export default function Nexo() {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          z-index: 10;
+          z-index: 20;
         }
 
         nav a {
@@ -204,6 +228,18 @@ export default function Nexo() {
 
           100% {
             transform: translate(-50%, -50%) scale(1);
+          }
+        }
+
+        @keyframes aparecer {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(15px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
           }
         }
       `}</style>
