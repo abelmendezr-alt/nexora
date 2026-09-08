@@ -54,21 +54,23 @@ fontSize: "14px",
         Entra para comenzar a conectar.
       </p>
 
-      <button
+      <Link
+        href="/nexo"
         style={{
+          display: "block",
           width: "100%",
+          boxSizing: "border-box",
           padding: "17px",
           borderRadius: "14px",
-          border: "none",
           background: "white",
           color: "black",
+          textDecoration: "none",
           fontSize: "16px",
           fontWeight: "bold",
-          cursor: "pointer",
         }}
       >
         Entrar al Nexo
-      </button>
+      </Link>
     </div>
   </div>
 </main>
