@@ -6,6 +6,7 @@ export default function Nexo() {
   const [publicando, setPublicando] = useState(false);
   const [texto, setTexto] = useState("");
   const [publicacion, setPublicacion] = useState("");
+  const [liked, setLiked] = useState(false);
 
   function publicar() {
     if (texto.trim() === "") return;
@@ -45,11 +46,14 @@ export default function Nexo() {
           <small>NEXORA · ahora</small>
           <p>{publicacion}</p>
 
-          <div>
-            <button>♡</button>
-            <button>Comentar</button>
-            <button>Compartir</button>
-          </div>
+         <div>
+  <button onClick={() => setLiked(!liked)}>
+    {liked ? "♥" : "♡"} {liked ? "1" : "0"}
+  </button>
+
+  <button>Comentar</button>
+  <button>Compartir</button>
+</div>
         </article>
       )}
 
