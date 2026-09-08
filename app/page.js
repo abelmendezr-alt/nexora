@@ -1,50 +1,29 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+
 export default function Home() {
+  const [active, setActive] = useState(false);
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#050505",
-        color: "white",
-        textAlign: "center",
-        padding: "24px",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "64px",
-          letterSpacing: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        NEXORA
-      </h1>
+    <main className="nexora-home">
 
-      <p
-        style={{
-          fontSize: "20px",
-          opacity: 0.7,
-          marginBottom: "40px",
-        }}
-      >
-        Todo está conectado.
-      </p>
+      <div
+        className={`nexora-light ${active ? "active" : ""}`}
+        onClick={() => setActive(true)}
+      />
 
-      <a
-        href="/entrar"
-        style={{
-          padding: "14px 32px",
-          border: "1px solid white",
-          borderRadius: "30px",
-          color: "white",
-          textDecoration: "none",
-        }}
-      >
-        Entrar
-      </a>
+      <div className={`nexora-content ${active ? "show" : ""}`}>
+        <h1>NEXORA</h1>
+
+        <p>Todo está conectado.</p>
+
+        <Link href="/entrar" className="enter-button">
+          ENTRAR
+        </Link>
+      </div>
+
     </main>
   );
 }
