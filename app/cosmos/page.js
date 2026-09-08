@@ -96,20 +96,24 @@ export default function Home() {
         }
 
         @keyframes despertar {
-          0% {
-            transform: scale(1);
-            opacity: 0;
-          }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 
-          20% {
-            opacity: 1;
-          }
+  15% {
+    opacity: 1;
+  }
 
-          100% {
-            transform: scale(45);
-            opacity: 0;
-          }
-        }
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(80);
+    opacity: 0;
+  }
+}
 
         @keyframes aparecer {
           from {
