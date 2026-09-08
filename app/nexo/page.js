@@ -53,7 +53,7 @@ export default function Nexo() {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(circle at center, #151515 0%, #050505 35%, #000 75%)",
+  "radial-gradient(circle at center, #303030 0%, #101010 35%, #030303 75%)",,
         }}
       />
 
