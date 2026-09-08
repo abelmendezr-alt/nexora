@@ -1,18 +1,45 @@
+"use client";
+
+import { useState } from "react";
+
 export default function Nexo() {
+  const [publicando, setPublicando] = useState(false);
+  const [texto, setTexto] = useState("");
+
   return (
     <main>
       <h1>NEXORA</h1>
 
       <p>El nexo está vivo.</p>
 
-      <div>
-        <button>＋ Publicar</button>
-      </div>
+      <button onClick={() => setPublicando(true)}>
+        ＋ Publicar
+      </button>
 
-      <section>
-        <p>Bienvenido al nexo.</p>
-        <p>Comparte algo con la red.</p>
-      </section>
+      {publicando && (
+        <section>
+          <textarea
+            placeholder="¿Qué quieres compartir?"
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+          />
+
+          <br />
+
+          <button
+            onClick={() => {
+              setPublicando(false);
+              setTexto("");
+            }}
+          >
+            Publicar
+          </button>
+
+          <button onClick={() => setPublicando(false)}>
+            Cancelar
+          </button>
+        </section>
+      )}
 
       <nav>
         <button>Inicio</button>
