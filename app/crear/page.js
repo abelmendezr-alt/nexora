@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
-const REACCIONES = ["♡", "✦", "◉", "∞"];
+import { useRouter } from "next/navigation";
 
 export default function Crear() {
   const [texto, setTexto] = useState("");
-  const [publicado, setPublicado] = useState(false);
+  const [reaccionInicial, setReaccionInicial] = useState("✦");
+  const router = useRouter();
 
   function publicar() {
     const contenido = texto.trim();
@@ -17,33 +17,31 @@ export default function Crear() {
     const nombre =
       localStorage.getItem("nexora_nombre") || "Usuario";
 
-    const publicaciones = JSON.parse(
-      localStorage.getItem("nexora_publicaciones") || "[]"
-    );
-
-    const nuevoPensamiento = {
+    const nuevaPublicacion = {
       id: Date.now(),
       nombre,
       texto: contenido,
-      reacciones: {
-        "♡": 0,
-        "✦": 0,
-        "◉": 0,
-        "∞": 0,
-      },
       creado: Date.now(),
+      reacciones: {
+        [reaccionInicial]: 1,
+      },
     };
+
+    const anteriores = JSON.parse(
+      localStorage.getItem("nexora_publicaciones") || "[]"
+    );
 
     localStorage.setItem(
       "nexora_publicaciones",
       JSON.stringify([
-        nuevoPensamiento,
-        ...publicaciones,
+        nuevaPublicacion,
+        ...anteriores,
       ])
     );
 
     setTexto("");
-    setPublicado(true);
+
+    router.push("/nexo");
   }
 
   return (
@@ -55,99 +53,72 @@ export default function Crear() {
 
       <section className="contenedor">
 
-        {!publicado ? (
-          <>
-            <div className="luz">◎</div>
+        <div className="luz">
+          ◉
+        </div>
 
-            <p className="etiqueta">
-              DEJA ALGO EN EL NEXO
-            </p>
+        <p className="etiqueta">
+          NUEVA CONEXIÓN
+        </p>
 
-            <h1>
-              ¿Qué estás pensando?
-            </h1>
+        <h1>
+          Deja un pensamiento.
+        </h1>
 
-            <textarea
-              autoFocus
-              value={texto}
-              onChange={(e) =>
-                setTexto(e.target.value)
-              }
-              placeholder="Escribe algo..."
-              maxLength={280}
-            />
+        <p className="subtitulo">
+          Algo pequeño puede conectar
+          con alguien más.
+        </p>
 
-            <div className="abajo">
-              <span>
-                {texto.length}/280
-              </span>
+        <textarea
+          autoFocus
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          placeholder="¿Qué quieres dejar en el nexo?"
+          maxLength={280}
+        />
 
+        <div className="contador">
+          {texto.length} / 280
+        </div>
+
+        <div className="reacciones">
+
+          <span>¿Cómo quieres iniciarlo?</span>
+
+          <div>
+            {["✦", "♡", "◉", "∞"].map((simbolo) => (
               <button
-                onClick={publicar}
-                disabled={!texto.trim()}
+                key={simbolo}
+                className={
+                  reaccionInicial === simbolo
+                    ? "seleccionado"
+                    : ""
+                }
+                onClick={() =>
+                  setReaccionInicial(simbolo)
+                }
               >
-                <span>◉</span>
-                CONECTAR
+                {simbolo}
               </button>
-            </div>
-
-            <p className="nota">
-              Tu pensamiento aparecerá en el flujo del Nexo.
-            </p>
-          </>
-        ) : (
-          <div className="exito">
-
-            <div className="luz grande">
-              ◎
-            </div>
-
-            <p className="etiqueta">
-              CONEXIÓN CREADA
-            </p>
-
-            <h1>
-              Tu pensamiento<br />
-              ya está en el nexo.
-            </h1>
-
-            <div className="reacciones">
-              {REACCIONES.map((reaccion) => (
-                <span key={reaccion}>
-                  {reaccion}
-                </span>
-              ))}
-            </div>
-
-            <div className="acciones">
-
-              <Link href="/nexo">
-                VOLVER AL NEXO
-              </Link>
-
-              <button
-                onClick={() => setPublicado(false)}
-              >
-                CREAR OTRO
-              </button>
-
-            </div>
-
+            ))}
           </div>
-        )}
 
-      </section>
+        </div>
 
-      <nav>
-        <Link href="/nexo">⌂</Link>
-        <Link href="/explorar">✦</Link>
+        <button
+          className="publicar"
+          disabled={!texto.trim()}
+          onClick={publicar}
+        >
+          CONECTAR
+        </button>
 
-        <Link href="/crear" className="activo">
-          ＋
+        <Link href="/nexo" className="volver">
+          ← volver al nexo
         </Link>
 
-        <Link href="/perfil">◉</Link>
-      </nav>
+      </section>
 
       <style jsx>{`
 
@@ -155,14 +126,14 @@ export default function Crear() {
           min-height: 100vh;
           background:
             radial-gradient(
-              circle at center,
+              circle at 50% 25%,
               #20202a 0%,
-              #09090d 45%,
+              #09090d 42%,
               #020203 100%
             );
           color: white;
           font-family: Arial, sans-serif;
-          padding-bottom: 90px;
+          overflow: hidden;
         }
 
         header {
@@ -172,7 +143,6 @@ export default function Crear() {
           display: flex;
           align-items: center;
           letter-spacing: 5px;
-          font-size: 14px;
         }
 
         header a {
@@ -183,63 +153,65 @@ export default function Crear() {
         .contenedor {
           width: min(90%, 560px);
           margin: 0 auto;
-          padding-top: 80px;
+          padding: 80px 0 50px;
           text-align: center;
         }
 
         .luz {
-          width: 62px;
-          height: 62px;
-          margin: 0 auto 28px;
+          width: 68px;
+          height: 68px;
+          margin: auto;
           border-radius: 50%;
           background: white;
           color: black;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
+          font-size: 25px;
           box-shadow:
             0 0 25px white,
-            0 0 65px rgba(255,255,255,.35);
+            0 0 70px rgba(255,255,255,.45);
           animation: respirar 3s ease-in-out infinite;
         }
 
-        .luz.grande {
-          width: 85px;
-          height: 85px;
-          font-size: 31px;
-          margin-bottom: 35px;
-        }
-
         .etiqueta {
-          margin: 0;
+          margin-top: 35px;
           font-size: 9px;
           letter-spacing: 4px;
           opacity: .35;
         }
 
         h1 {
-          margin: 18px 0 30px;
-          font-size: 27px;
+          margin: 15px 0 0;
+          font-size: clamp(25px, 6vw, 38px);
           font-weight: 300;
-          line-height: 1.4;
           letter-spacing: 2px;
+        }
+
+        .subtitulo {
+          margin: 13px auto 35px;
+          font-size: 13px;
+          line-height: 1.6;
+          opacity: .4;
         }
 
         textarea {
           width: 100%;
           min-height: 190px;
           box-sizing: border-box;
-          padding: 20px;
           resize: none;
-          outline: none;
-          border: 1px solid #292929;
+          padding: 22px;
           border-radius: 22px;
+          border: 1px solid #292929;
           background: rgba(255,255,255,.035);
           color: white;
-          font-family: inherit;
-          font-size: 17px;
+          outline: none;
+          font-size: 18px;
           line-height: 1.5;
+        }
+
+        textarea::placeholder {
+          color: #666;
         }
 
         textarea:focus {
@@ -248,126 +220,87 @@ export default function Crear() {
             0 0 30px rgba(255,255,255,.06);
         }
 
-        .abajo {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-top: 14px;
-        }
-
-        .abajo > span {
-          font-size: 10px;
-          opacity: .3;
-        }
-
-        button {
-          cursor: pointer;
-        }
-
-        .abajo button {
-          border: 1px solid white;
-          border-radius: 30px;
-          padding: 12px 20px;
-          background: white;
-          color: black;
+        .contador {
+          text-align: right;
+          margin-top: 8px;
           font-size: 9px;
-          letter-spacing: 2px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .abajo button span {
-          font-size: 15px;
-        }
-
-        .abajo button:disabled {
-          opacity: .25;
-          cursor: default;
-        }
-
-        .nota {
-          margin-top: 25px;
-          font-size: 10px;
           opacity: .3;
-        }
-
-        .exito {
-          animation: aparecer .6s ease;
-        }
-
-        .exito h1 {
-          margin-bottom: 35px;
         }
 
         .reacciones {
-          display: flex;
-          justify-content: center;
-          gap: 30px;
-          font-size: 22px;
-          opacity: .7;
+          margin-top: 28px;
+          text-align: left;
         }
 
-        .reacciones span {
+        .reacciones > span {
+          display: block;
+          margin-bottom: 10px;
+          font-size: 9px;
+          letter-spacing: 2px;
+          opacity: .35;
+        }
+
+        .reacciones div {
+          display: flex;
+          gap: 9px;
+        }
+
+        .reacciones button {
+          width: 48px;
+          height: 42px;
+          border-radius: 22px;
+          border: 1px solid #292929;
+          background: rgba(255,255,255,.025);
+          color: white;
+          font-size: 18px;
+          cursor: pointer;
+          transition: .25s ease;
+        }
+
+        .reacciones button:hover {
+          border-color: #666;
+        }
+
+        .reacciones button.seleccionado {
+          background: white;
+          color: black;
+          border-color: white;
+          box-shadow:
+            0 0 20px rgba(255,255,255,.25);
+        }
+
+        .publicar {
+          width: 100%;
+          margin-top: 35px;
+          padding: 16px;
+          border-radius: 30px;
+          border: 1px solid white;
+          background: white;
+          color: black;
+          font-size: 10px;
+          letter-spacing: 3px;
+          cursor: pointer;
           transition: .3s ease;
         }
 
-        .reacciones span:hover {
-          transform: scale(1.4);
-          text-shadow: 0 0 15px white;
+        .publicar:hover {
+          box-shadow:
+            0 0 30px rgba(255,255,255,.3);
         }
 
-        .acciones {
-          display: flex;
-          justify-content: center;
-          gap: 10px;
-          margin-top: 45px;
+        .publicar:disabled {
+          opacity: .2;
+          cursor: default;
+          box-shadow: none;
         }
 
-        .acciones a,
-        .acciones button {
-          padding: 12px 18px;
-          border-radius: 25px;
-          font-size: 9px;
-          letter-spacing: 1.5px;
-          text-decoration: none;
-        }
-
-        .acciones a {
-          border: 1px solid white;
-          color: white;
-        }
-
-        .acciones button {
-          border: 1px solid #333;
-          background: transparent;
-          color: white;
-        }
-
-        nav {
-          position: fixed;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          height: 65px;
-          background: rgba(0,0,0,.92);
-          border-top: 1px solid #222;
-          display: flex;
-          align-items: center;
-          justify-content: space-around;
-          z-index: 20;
-        }
-
-        nav a {
+        .volver {
+          display: inline-block;
+          margin-top: 25px;
           color: white;
           text-decoration: none;
-          font-size: 22px;
-          opacity: .55;
-        }
-
-        nav a.activo {
-          opacity: 1;
-          text-shadow: 0 0 18px white;
+          font-size: 10px;
+          opacity: .35;
         }
 
         @keyframes respirar {
@@ -380,31 +313,16 @@ export default function Crear() {
           }
         }
 
-        @keyframes aparecer {
-          from {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
         @media (max-width: 500px) {
+
           .contenedor {
             padding-top: 55px;
           }
 
-          h1 {
-            font-size: 23px;
+          textarea {
+            min-height: 170px;
           }
 
-          .acciones {
-            flex-direction: column;
-            align-items: center;
-          }
         }
 
       `}</style>
