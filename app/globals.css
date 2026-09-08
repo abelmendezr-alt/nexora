@@ -74,13 +74,29 @@ body {
   height: 220px;
 
   box-shadow:
-    0 0 40px white,
-    0 0 120px rgba(255, 255, 255, 0.7),
-    0 0 240px rgba(255, 255, 255, 0.4);
+    0 0 60px white,
+    0 0 140px rgba(255, 255, 255, 0.8),
+    0 0 280px rgba(255, 255, 255, 0.5);
 
-  opacity: 0;
+  animation: enterNexora 1.4s ease-in forwards;
 }
 
+@keyframes enterNexora {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  55% {
+    transform: scale(4);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(12);
+    opacity: 0;
+  }
+}
 /* TEXTO */
 
 .nexora-content {
