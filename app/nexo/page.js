@@ -5,11 +5,11 @@ import { useEffect, useState, useRef } from "react";
 export default function Nexo() {
   const [publicaciones, setPublicaciones] = useState([]);
   const [destacada, setDestacada] = useState(null);
-  const [zoomInicial, setZoomInicial] = useState(false);
-  const [escala, setEscala] = useState(1);
-  const [posicion, setPosicion] = useState({ x: 0, y: 0 });
 
-  const galaxiaRef = useRef(null);
+  const [posicion, setPosicion] = useState({ x: 0, y: 0 });
+  const [escala, setEscala] = useState(1);
+
+  const [viajando, setViajando] = useState(false);
 
   const tocando = useRef(false);
   const moviendo = useRef(false);
@@ -43,10 +43,6 @@ export default function Nexo() {
       })[0];
 
       setDestacada(mayor);
-
-      setTimeout(() => {
-        setZoomInicial(true);
-      }, 800);
     }
   }, []);
 
@@ -70,11 +66,11 @@ export default function Nexo() {
 
     setPublicaciones(actualizadas);
 
-    const nuevaDestacada = actualizadas.find(
+    const nueva = actualizadas.find(
       (publicacion) => publicacion.id === destacada.id
     );
 
-    setDestacada(nuevaDestacada);
+    setDestacada(nueva);
 
     localStorage.setItem(
       "nexora_publicaciones",
@@ -83,34 +79,39 @@ export default function Nexo() {
   }
 
   function seleccionarPensamiento(publicacion) {
+    if (moviendo.current) return;
+
     setDestacada(publicacion);
-    setZoomInicial(false);
+    setViajando(true);
+
+    /*
+      Pequeño viaje visual hacia el pensamiento.
+      Después regresamos a una escala cómoda
+      para poder seguir explorando.
+    */
+    setTimeout(() => {
+      setViajando(false);
+    }, 900);
   }
 
-  function obtenerColores(reacciones) {
-    const colores = [];
-
+  function obtenerColor(reacciones) {
     if (reacciones["♡"] > 0) {
-      colores.push("rgba(255, 100, 180, 0.8)");
+      return "rgba(255, 100, 180, 0.9)";
     }
 
     if (reacciones["✦"] > 0) {
-      colores.push("rgba(255, 210, 80, 0.8)");
+      return "rgba(255, 210, 80, 0.9)";
     }
 
     if (reacciones["◉"] > 0) {
-      colores.push("rgba(80, 170, 255, 0.8)");
+      return "rgba(80, 170, 255, 0.9)";
     }
 
     if (reacciones["∞"] > 0) {
-      colores.push("rgba(190, 100, 255, 0.8)");
+      return "rgba(190, 100, 255, 0.9)";
     }
 
-    if (colores.length === 0) {
-      return "rgba(255,255,255,0.8)";
-    }
-
-    return colores[0];
+    return "rgba(255,255,255,0.8)";
   }
 
   function distancia(a, b) {
@@ -153,7 +154,7 @@ export default function Nexo() {
       const dy =
         e.touches[0].clientY - inicio.current.y;
 
-      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
         moviendo.current = true;
       }
 
@@ -189,6 +190,10 @@ export default function Nexo() {
 
   function tocarFinal() {
     tocando.current = false;
+
+    setTimeout(() => {
+      moviendo.current = false;
+    }, 50);
   }
 
   return (
@@ -196,10 +201,7 @@ export default function Nexo() {
       <div className="titulo">NEXORA</div>
 
       <div
-        ref={galaxiaRef}
-        className={`galaxia ${
-          zoomInicial ? "zoom-inicial" : ""
-        }`}
+        className={`galaxia ${viajando ? "viaje" : ""}`}
         style={{
           transform: `
             translate(${posicion.x}px, ${posicion.y}px)
@@ -226,7 +228,7 @@ export default function Nexo() {
             destacada?.id === publicacion.id;
 
           const color =
-            obtenerColores(reacciones);
+            obtenerColor(reacciones);
 
           return (
             <button
@@ -234,28 +236,28 @@ export default function Nexo() {
               className={`pensamiento ${
                 esDestacada ? "destacada" : ""
               }`}
-              onClick={() => {
-                if (!moviendo.current) {
-                  seleccionarPensamiento(
-                    publicacion
-                  );
-                }
-              }}
+              onClick={() =>
+                seleccionarPensamiento(publicacion)
+              }
               style={{
                 top: `${25 + (index * 17) % 55}%`,
                 left: `${20 + (index * 23) % 60}%`,
+
                 width: esDestacada
                   ? `${70 + total * 4}px`
                   : `${35 + total * 4}px`,
+
                 height: esDestacada
                   ? `${70 + total * 4}px`
                   : `${35 + total * 4}px`,
+
                 background: "white",
+
                 boxShadow: `
                   0 0 15px white,
                   0 0 35px ${color},
                   0 0 70px ${color},
-                  0 0 120px ${color}
+                  0 0 130px ${color}
                 `,
               }}
             />
@@ -264,7 +266,11 @@ export default function Nexo() {
       </div>
 
       {destacada && (
-        <div className="pensamiento-info">
+        <div
+          className={`pensamiento-info ${
+            viajando ? "info-viajando" : ""
+          }`}
+        >
           <div className="autor">
             {destacada.nombre}
           </div>
@@ -339,49 +345,87 @@ export default function Nexo() {
         .galaxia {
           position: absolute;
           inset: 0;
-          transition: transform 0.25s ease-out;
           transform-origin: center center;
+          transition:
+            transform 0.25s ease-out;
         }
 
-        .galaxia.zoom-inicial {
-          transition: transform 3s ease;
-          transform: scale(2.2);
+        .galaxia.viaje {
+          transition:
+            transform 0.9s
+            cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .pensamiento {
           position: absolute;
-          transform: translate(-50%, -50%);
+          transform:
+            translate(-50%, -50%);
+
           border-radius: 50%;
           border: none;
           padding: 0;
+
           cursor: pointer;
-          animation: respirar 4s ease-in-out infinite;
+
+          animation:
+            respirar 4s
+            ease-in-out
+            infinite;
+
           transition:
             width 1s ease,
             height 1s ease,
-            box-shadow 1s ease;
-          -webkit-tap-highlight-color: transparent;
+            box-shadow 1s ease,
+            transform 0.3s ease;
+
+          -webkit-tap-highlight-color:
+            transparent;
         }
 
         .pensamiento:active {
           transform:
             translate(-50%, -50%)
-            scale(0.9);
+            scale(0.82);
         }
 
         .pensamiento-info {
           position: absolute;
           left: 50%;
           bottom: 100px;
-          transform: translateX(-50%);
-          width: min(90%, 500px);
+
+          transform:
+            translateX(-50%);
+
+          width:
+            min(90%, 500px);
+
           padding: 20px;
+
           text-align: center;
-          background: rgba(0, 0, 0, 0.65);
-          border: 1px solid #333;
-          border-radius: 20px;
+
+          background:
+            rgba(0, 0, 0, 0.68);
+
+          border:
+            1px solid #333;
+
+          border-radius:
+            20px;
+
           z-index: 10;
-          backdrop-filter: blur(10px);
+
+          backdrop-filter:
+            blur(12px);
+
+          animation:
+            aparecer 0.7s ease;
+        }
+
+        .pensamiento-info.info-viajando {
+          animation:
+            entrarPensamiento
+            0.9s
+            ease;
         }
 
         .autor {
@@ -397,23 +441,43 @@ export default function Nexo() {
 
         .reacciones {
           margin-top: 18px;
+
           display: flex;
           justify-content: center;
+
           gap: 8px;
         }
 
         .reacciones button {
-          background: rgba(255, 255, 255, 0.05);
+          background:
+            rgba(255, 255, 255, 0.05);
+
           color: white;
-          border: 1px solid #333;
-          border-radius: 20px;
-          padding: 8px 12px;
+
+          border:
+            1px solid #333;
+
+          border-radius:
+            20px;
+
+          padding:
+            8px 12px;
+
           cursor: pointer;
+
           font-size: 16px;
+
+          transition:
+            transform 0.2s ease,
+            background 0.2s ease;
         }
 
-        .reacciones button:hover {
-          background: rgba(255, 255, 255, 0.15);
+        .reacciones button:active {
+          transform:
+            scale(1.15);
+
+          background:
+            rgba(255, 255, 255, 0.18);
         }
 
         .pensamiento-info small {
@@ -424,25 +488,43 @@ export default function Nexo() {
 
         .vacio {
           position: absolute;
+
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%);
+
+          transform:
+            translate(-50%, -50%);
+
           text-align: center;
+
           opacity: 0.6;
+
           width: 80%;
         }
 
         nav {
           position: fixed;
+
           bottom: 0;
           left: 0;
           right: 0;
+
           height: 65px;
-          background: rgba(0, 0, 0, 0.8);
-          border-top: 1px solid #222;
+
+          background:
+            rgba(0, 0, 0, 0.8);
+
+          border-top:
+            1px solid #222;
+
           display: flex;
-          justify-content: space-around;
-          align-items: center;
+
+          justify-content:
+            space-around;
+
+          align-items:
+            center;
+
           z-index: 20;
         }
 
@@ -468,6 +550,40 @@ export default function Nexo() {
           100% {
             transform:
               translate(-50%, -50%)
+              scale(1);
+          }
+        }
+
+        @keyframes aparecer {
+          from {
+            opacity: 0;
+            transform:
+              translateX(-50%)
+              translateY(15px);
+          }
+
+          to {
+            opacity: 1;
+            transform:
+              translateX(-50%)
+              translateY(0);
+          }
+        }
+
+        @keyframes entrarPensamiento {
+          0% {
+            opacity: 0;
+            transform:
+              translateX(-50%)
+              translateY(30px)
+              scale(0.85);
+          }
+
+          100% {
+            opacity: 1;
+            transform:
+              translateX(-50%)
+              translateY(0)
               scale(1);
           }
         }
