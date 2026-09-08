@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 
 export default function Nexo() {
-    const [destacada, setDestacada] = useState(null);
+  const [publicaciones, setPublicaciones] = useState([]);
+  const [destacada, setDestacada] = useState(null);
 
   useEffect(() => {
     const guardadas = JSON.parse(
@@ -11,6 +12,24 @@ export default function Nexo() {
     );
 
     setPublicaciones(guardadas);
+
+    if (guardadas.length > 0) {
+      const mayor = [...guardadas].sort((a, b) => {
+        const totalA = Object.values(a.reacciones || {}).reduce(
+          (suma, cantidad) => suma + cantidad,
+          0
+        );
+
+        const totalB = Object.values(b.reacciones || {}).reduce(
+          (suma, cantidad) => suma + cantidad,
+          0
+        );
+
+        return totalB - totalA;
+      })[0];
+
+      setDestacada(mayor);
+    }
   }, []);
 
   return (
@@ -23,21 +42,45 @@ export default function Nexo() {
             publicacion.reacciones || {}
           ).reduce((total, cantidad) => total + cantidad, 0);
 
+          const esDestacada = destacada?.id === publicacion.id;
+
           return (
             <div
               key={publicacion.id}
-              className="pensamiento"
+              className={`pensamiento ${
+                esDestacada ? "destacada" : ""
+              }`}
               style={{
                 top: `${25 + (index * 17) % 55}%`,
                 left: `${20 + (index * 23) % 60}%`,
-                width: `${35 + reacciones * 4}px`,
-                height: `${35 + reacciones * 4}px`,
+                width: esDestacada
+                  ? `${70 + reacciones * 4}px`
+                  : `${35 + reacciones * 4}px`,
+                height: esDestacada
+                  ? `${70 + reacciones * 4}px`
+                  : `${35 + reacciones * 4}px`,
               }}
               title={publicacion.texto}
             />
           );
         })}
       </div>
+
+      {destacada && (
+        <div className="pensamiento-info">
+          <div>{destacada.nombre}</div>
+
+          <p>{destacada.texto}</p>
+
+          <small>
+            {Object.values(destacada.reacciones || {}).reduce(
+              (total, cantidad) => total + cantidad,
+              0
+            )}{" "}
+            conexiones
+          </small>
+        </div>
+      )}
 
       {publicaciones.length === 0 && (
         <div className="vacio">
@@ -89,7 +132,35 @@ export default function Nexo() {
             0 0 15px white,
             0 0 45px rgba(255, 255, 255, 0.6);
           animation: respirar 4s ease-in-out infinite;
-          cursor: pointer;
+        }
+
+        .pensamiento.destacada {
+          box-shadow:
+            0 0 30px white,
+            0 0 80px rgba(255, 255, 255, 0.9),
+            0 0 150px rgba(255, 255, 255, 0.5);
+        }
+
+        .pensamiento-info {
+          position: absolute;
+          left: 50%;
+          bottom: 100px;
+          transform: translateX(-50%);
+          width: min(90%, 500px);
+          padding: 20px;
+          text-align: center;
+          background: rgba(0, 0, 0, 0.6);
+          border: 1px solid #333;
+          border-radius: 20px;
+          z-index: 5;
+        }
+
+        .pensamiento-info p {
+          font-size: 19px;
+        }
+
+        .pensamiento-info small {
+          opacity: 0.5;
         }
 
         .vacio {
