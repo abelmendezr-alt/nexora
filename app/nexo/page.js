@@ -6,6 +6,8 @@ export default function Nexo() {
   const [publicando, setPublicando] = useState(false);
   const [texto, setTexto] = useState("");
   const [publicaciones, setPublicaciones] = useState([]);
+  const [comentando, setComentando] = useState(null);
+  const [comentario, setComentario] = useState("");
 
   function publicar() {
     if (texto.trim() === "") return;
@@ -14,6 +16,7 @@ export default function Nexo() {
       id: Date.now(),
       texto: texto,
       liked: false,
+      comentarios: [],
     };
 
     setPublicaciones([nuevaPublicacion, ...publicaciones]);
@@ -29,6 +32,24 @@ export default function Nexo() {
           : publicacion
       )
     );
+  }
+
+  function agregarComentario(id) {
+    if (comentario.trim() === "") return;
+
+    setPublicaciones(
+      publicaciones.map((publicacion) =>
+        publicacion.id === id
+          ? {
+              ...publicacion,
+              comentarios: [...publicacion.comentarios, comentario],
+            }
+          : publicacion
+      )
+    );
+
+    setComentario("");
+    setComentando(null);
   }
 
   return (
@@ -69,9 +90,32 @@ export default function Nexo() {
               {publicacion.liked ? "♥ 1" : "♡ 0"}
             </button>
 
-            <button>Comentar</button>
+            <button onClick={() => setComentando(publicacion.id)}>
+              💬 {publicacion.comentarios.length}
+            </button>
+
             <button>Compartir</button>
           </div>
+
+          {comentando === publicacion.id && (
+            <div>
+              <input
+                placeholder="Un pensamiento..."
+                value={comentario}
+                onChange={(e) => setComentario(e.target.value)}
+              />
+
+              <button onClick={() => agregarComentario(publicacion.id)}>
+                →
+              </button>
+            </div>
+          )}
+
+          {publicacion.comentarios.map((comentario, index) => (
+            <small key={index}>
+              💭 {comentario}
+            </small>
+          ))}
         </article>
       ))}
 
