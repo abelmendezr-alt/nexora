@@ -7,190 +7,20 @@ body {
   margin: 0;
   padding: 0;
   background: #000;
+  color: white;
 }
 
 body {
-  overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
-.nexora-home {
-  min-height: 100vh;
-  width: 100%;
-  background: #000;
+a {
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* LA LUZ */
-
-.nexora-light {
-  position: absolute;
-  width: 95px;
-  height: 95px;
-  border-radius: 50%;
-  background: white;
-
-  box-shadow:
-    0 0 25px rgba(255, 255, 255, 0.9),
-    0 0 70px rgba(255, 255, 255, 0.55),
-    0 0 140px rgba(255, 255, 255, 0.25);
-
-  cursor: pointer;
-
-  animation: floating 4s ease-in-out infinite;
-
-  transition:
-    width 1.2s ease,
-    height 1.2s ease,
-    box-shadow 1.2s ease,
-    opacity 1.2s ease;
-}
-
-/* MOVIMIENTO DE LA LUZ */
-
-@keyframes floating {
-  0% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-18px);
-  }
-
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-/* CUANDO ENTRA EN EL NEXO */
-
-.nexora-light.active {
-  width: 220px;
-  height: 220px;
-
-  box-shadow:
-    0 0 60px white,
-    0 0 140px rgba(255, 255, 255, 0.8),
-    0 0 280px rgba(255, 255, 255, 0.5);
-
-  animation: enterNexora 1.8s ease-in forwards;
-}
-
-@keyframes enterNexora {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  45% {
-    transform: scale(4);
-    opacity: 1;
-  }
-
-  75% {
-    transform: scale(10);
-    opacity: 0.35;
-  }
-
-  100% {
-    transform: scale(14);
-    opacity: 0;
-  }
-}
-/* TEXTO */
-
-.nexora-content {
-  position: absolute;
-  text-align: center;
-
-  opacity: 0;
-  transform: translateY(20px);
-
-  transition:
-    opacity 1.5s ease,
-    transform 1.5s ease;
-
-  pointer-events: none;
-}
-
-.nexora-content.show {
-  opacity: 1;
-  transform: translateY(0);
-
-  pointer-events: auto;
-}
-
-.nexora-content h1 {
-  margin: 0;
-
-  font-size: clamp(48px, 10vw, 90px);
-
-  letter-spacing: 18px;
-
-  font-weight: 300;
-}
-
-.nexora-content p {
-  margin-top: 20px;
-
-  font-size: 18px;
-
-  letter-spacing: 4px;
-
-  opacity: 0.65;
-}
-
-/* BOTÓN */
-
-.enter-button {
-  display: inline-block;
-
-  margin-top: 40px;
-
-  padding: 14px 34px;
-
-  border: 1px solid rgba(255, 255, 255, 0.7);
-
-  border-radius: 40px;
-
-  color: white;
-
   text-decoration: none;
-
-  letter-spacing: 4px;
-
-  font-size: 13px;
-
-  transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    transform 0.3s ease;
 }
 
-.enter-button:hover {
-  background: white;
-  color: black;
-
-  transform: scale(1.05);
-}
-.reaction {
-  background: transparent;
-  color: white;
-  border: 1px solid #333;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.reaction:hover {
-  transform: scale(1.15);
-  border-color: white;
+button,
+input,
+textarea {
+  font-family: inherit;
 }
