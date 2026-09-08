@@ -194,6 +194,45 @@ export default function Nexo() {
           </article>
         ))}
       </section>
-    </main>
-  );
-}
+    <nav
+  style={{
+    position: "fixed",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "65px",
+    background: "#050505",
+    borderTop: "1px solid #222",
+    display: "flex",
+    justifyContent: "space-around",
+    alignItems: "center",
+  }}
+>
+  <a
+    href="/nexo"
+    style={{ color: "white", textDecoration: "none" }}
+  >
+    ⌂
+  </a>
+
+  <a
+    href="/explorar"
+    style={{ color: "white", textDecoration: "none" }}
+  >
+    ✦
+  </a>
+
+  <a
+    href="/crear"
+    style={{ color: "white", textDecoration: "none" }}
+  >
+    ＋
+  </a>
+
+  <a
+    href="/perfil"
+    style={{ color: "white", textDecoration: "none" }}
+  >
+    ◉
+  </a>
+</nav>
