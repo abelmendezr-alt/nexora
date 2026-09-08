@@ -136,6 +136,18 @@ function reaccionar(simbolo) {
           <p>{destacada.texto}</p>
 
           <small>
+        <div className="reacciones">
+  {Object.entries(
+    destacada.reacciones || {}
+  ).map(([simbolo, cantidad]) => (
+    <button
+      key={simbolo}
+      onClick={() => reaccionar(simbolo)}
+    >
+      {simbolo} {cantidad}
+    </button>
+  ))}
+</div>
             {Object.values(
               destacada.reacciones || {}
             ).reduce(
@@ -230,7 +242,26 @@ function reaccionar(simbolo) {
           font-size: 20px;
           line-height: 1.4;
         }
+.reacciones {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
 
+.reacciones button {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.reacciones button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
         .pensamiento-info small {
           opacity: 0.5;
         }
