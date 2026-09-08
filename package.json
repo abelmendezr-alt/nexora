@@ -1,13 +1,15 @@
-import Link from "next/link";
-
-export default function Home() {
-  return (
-    <main>
-      <h1>NEXORA</h1>
-      <p>Todo está conectado.</p>
-
-      <Link href="/entrar">Entrar</Link>
-      <Link href="/entrar">Explorar el nexo</Link>
-    </main>
-  );
+{
+  "name": "nexora",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
 }
