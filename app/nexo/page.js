@@ -3,126 +3,172 @@
 import { useState } from "react";
 
 export default function Nexo() {
-  const [publicando, setPublicando] = useState(false);
   const [texto, setTexto] = useState("");
-  const [publicaciones, setPublicaciones] = useState([]);
-  const [comentando, setComentando] = useState(null);
-  const [comentario, setComentario] = useState("");
+  const [publicacion, setPublicacion] = useState("");
 
   function publicar() {
-    if (texto.trim() === "") return;
+    if (!texto.trim()) return;
 
-    const nuevaPublicacion = {
-      id: Date.now(),
-      texto: texto,
-      liked: false,
-      comentarios: [],
-    };
-
-    setPublicaciones([nuevaPublicacion, ...publicaciones]);
+    setPublicacion(texto);
     setTexto("");
-    setPublicando(false);
-  }
-
-  function darLike(id) {
-    setPublicaciones(
-      publicaciones.map((publicacion) =>
-        publicacion.id === id
-          ? { ...publicacion, liked: !publicacion.liked }
-          : publicacion
-      )
-    );
-  }
-
-  function agregarComentario(id) {
-    if (comentario.trim() === "") return;
-
-    setPublicaciones(
-      publicaciones.map((publicacion) =>
-        publicacion.id === id
-          ? {
-              ...publicacion,
-              comentarios: [...publicacion.comentarios, comentario],
-            }
-          : publicacion
-      )
-    );
-
-    setComentario("");
-    setComentando(null);
   }
 
   return (
-    <main>
-      <h1>NEXORA</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#050505",
+        color: "white",
+        fontFamily: "Arial, sans-serif",
+        paddingBottom: "80px",
+      }}
+    >
+      {/* ENCABEZADO */}
 
-      <p>El nexo está vivo.</p>
+      <header
+        style={{
+          padding: "22px",
+          borderBottom: "1px solid #222",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <strong
+          style={{
+            letterSpacing: "5px",
+            fontSize: "20px",
+          }}
+        >
+          NEXORA
+        </strong>
 
-      <button onClick={() => setPublicando(true)}>
-        ＋ Publicar
-      </button>
+        <span style={{ opacity: 0.5 }}>◉</span>
+      </header>
 
-      {publicando && (
-        <section>
+      {/* CONTENIDO */}
+
+      <section
+        style={{
+          maxWidth: "600px",
+          margin: "auto",
+          padding: "25px 20px",
+        }}
+      >
+        <h2
+          style={{
+            fontWeight: "300",
+            letterSpacing: "3px",
+          }}
+        >
+          EL NEXO
+        </h2>
+
+        <p style={{ opacity: 0.5 }}>
+          Lo que ocurre aquí empieza contigo.
+        </p>
+
+        {/* PUBLICAR */}
+
+        <div
+          style={{
+            marginTop: "30px",
+            border: "1px solid #222",
+            borderRadius: "18px",
+            padding: "18px",
+          }}
+        >
           <textarea
-            placeholder="¿Qué quieres compartir?"
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
+            placeholder="¿Qué quieres conectar?"
+            style={{
+              width: "100%",
+              minHeight: "90px",
+              background: "transparent",
+              color: "white",
+              border: "none",
+              outline: "none",
+              resize: "none",
+              fontSize: "16px",
+            }}
           />
 
-          <br />
-
-          <button onClick={publicar}>Publicar</button>
-          <button onClick={() => setPublicando(false)}>
-            Cancelar
+          <button
+            onClick={publicar}
+            style={{
+              marginTop: "10px",
+              padding: "10px 22px",
+              borderRadius: "25px",
+              border: "1px solid white",
+              background: "transparent",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            CONECTAR
           </button>
-        </section>
-      )}
+        </div>
 
-      {publicaciones.map((publicacion) => (
-        <article key={publicacion.id}>
-          <small>NEXORA · ahora</small>
+        {/* PUBLICACIÓN */}
 
-          <p>{publicacion.texto}</p>
-
-          <div>
-            <button onClick={() => darLike(publicacion.id)}>
-              {publicacion.liked ? "♥ 1" : "♡ 0"}
-            </button>
-
-            <button onClick={() => setComentando(publicacion.id)}>
-              💬 {publicacion.comentarios.length}
-            </button>
-
-            <button>Compartir</button>
-          </div>
-
-          {comentando === publicacion.id && (
-            <div>
-              <input
-                placeholder="Un pensamiento..."
-                value={comentario}
-                onChange={(e) => setComentario(e.target.value)}
-              />
-
-              <button onClick={() => agregarComentario(publicacion.id)}>
-                →
-              </button>
+        {publicacion && (
+          <article
+            style={{
+              marginTop: "30px",
+              padding: "20px",
+              border: "1px solid #222",
+              borderRadius: "18px",
+            }}
+          >
+            <div style={{ opacity: 0.5 }}>
+              ◉ Tú
             </div>
-          )}
 
-          {publicacion.comentarios.map((comentario, index) => (
-            <small key={index}>
-              💭 {comentario}
-            </small>
-          ))}
-        </article>
-      ))}
+            <p
+              style={{
+                marginTop: "18px",
+                fontSize: "18px",
+              }}
+            >
+              {publicacion}
+            </p>
 
-      <nav>
-        <button>Inicio</button>
-        <button>Nexo</button>
-        <button>IA</button>
+            <div
+              style={{
+                marginTop: "20px",
+                opacity: 0.6,
+                display: "flex",
+                gap: "25px",
+              }}
+            >
+              ♡ &nbsp; ✦ &nbsp; ◉
+            </div>
+          </article>
+        )}
+      </section>
+
+      {/* NAVEGACIÓN */}
+
+      <nav
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "65px",
+          background: "#050505",
+          borderTop: "1px solid #222",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          opacity: 0.8,
+        }}
+      >
+        <span>⌂</span>
+        <span>✦</span>
+        <span>＋</span>
+        <span>◉</span>
       </nav>
     </main>
   );
