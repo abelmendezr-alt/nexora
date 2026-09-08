@@ -3,186 +3,106 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const REACCIONES = ["♡", "✦", "◉", "∞"];
-
-const POSICIONES = [
-  { x: 14, y: 20 },
-  { x: 84, y: 18 },
-  { x: 8, y: 50 },
-  { x: 92, y: 50 },
-  { x: 18, y: 80 },
-  { x: 82, y: 82 },
-  { x: 35, y: 8 },
-  { x: 65, y: 8 },
-  { x: 35, y: 92 },
-  { x: 65, y: 92 },
-  { x: 23, y: 38 },
-  { x: 77, y: 62 },
-];
-
 export default function Nexo() {
   const [nombre, setNombre] = useState("Usuario");
   const [publicaciones, setPublicaciones] = useState([]);
+  const [nexos, setNexos] = useState([]);
   const [seleccionado, setSeleccionado] = useState(null);
+  const [acercamiento, setAcercamiento] = useState(false);
 
   useEffect(() => {
-    cargarNexo();
-
-    const actualizar = () => cargarNexo();
-
-    window.addEventListener(
-      "nexora_actualizada",
-      actualizar
+    setNombre(
+      localStorage.getItem("nexora_nombre") || "Usuario"
     );
 
-    window.addEventListener(
-      "storage",
-      actualizar
+    setPublicaciones(
+      JSON.parse(
+        localStorage.getItem("nexora_publicaciones") || "[]"
+      )
     );
 
-    return () => {
-      window.removeEventListener(
-        "nexora_actualizada",
-        actualizar
-      );
-
-      window.removeEventListener(
-        "storage",
-        actualizar
-      );
-    };
+    setNexos(
+      JSON.parse(
+        localStorage.getItem("nexora_nexos") || "[]"
+      )
+    );
   }, []);
 
-  function cargarNexo() {
-    const miNombre =
-      localStorage.getItem("nexora_nombre") ||
-      "Usuario";
+  const posiciones = [
+    { x: 14, y: 20 },
+    { x: 84, y: 18 },
+    { x: 8, y: 50 },
+    { x: 92, y: 50 },
+    { x: 18, y: 80 },
+    { x: 82, y: 82 },
+    { x: 35, y: 8 },
+    { x: 65, y: 8 },
+    { x: 35, y: 92 },
+    { x: 65, y: 92 },
+  ];
 
-    const guardadas = JSON.parse(
-      localStorage.getItem(
-        "nexora_publicaciones"
-      ) || "[]"
-    );
+  const conexiones =
+    nexos.length > 0
+      ? nexos
+      : [
+          { persona: "Nexo", reacciones: 8 },
+          { persona: "Cosmo", reacciones: 17 },
+          { persona: "Origen", reacciones: 31 },
+          { persona: "Conexión", reacciones: 12 },
+        ];
 
-    setNombre(miNombre);
-    setPublicaciones(guardadas);
-  }
-
-  function totalReacciones(publicacion) {
-    return Object.values(
-      publicacion.reacciones || {}
-    ).reduce(
-      (total, cantidad) =>
-        total + Number(cantidad || 0),
-      0
-    );
-  }
-
-  function reaccionar(id, simbolo) {
-    const guardadas = JSON.parse(
-      localStorage.getItem(
-        "nexora_publicaciones"
-      ) || "[]"
-    );
-
-    const nuevas = guardadas.map(
-      (publicacion) => {
-        if (publicacion.id !== id) {
-          return publicacion;
-        }
-
-        const reacciones = {
-          "♡": 0,
-          "✦": 0,
-          "◉": 0,
-          "∞": 0,
-          ...(publicacion.reacciones || {}),
-        };
-
-        reacciones[simbolo] += 1;
-
-        return {
-          ...publicacion,
-          reacciones,
-        };
-      }
-    );
-
-    localStorage.setItem(
-      "nexora_publicaciones",
-      JSON.stringify(nuevas)
-    );
-
-    setPublicaciones(nuevas);
-
-    window.dispatchEvent(
-      new Event("nexora_actualizada")
-    );
-  }
-
-  function tamañoNodo(publicacion) {
-    const total =
-      totalReacciones(publicacion);
-
-    return Math.min(
-      68,
-      30 + total * 4
-    );
-  }
-
-  function intensidadNodo(publicacion) {
-    const total =
-      totalReacciones(publicacion);
-
-    return Math.min(
-      1,
-      0.35 + total * 0.08
-    );
-  }
-
-  function colorNodo(publicacion) {
-    const total =
-      totalReacciones(publicacion);
-
-    if (total >= 12) {
-      return "hsl(280, 80%, 75%)";
+  function reaccionTotal(nexo) {
+    if (typeof nexo.reacciones === "number") {
+      return nexo.reacciones;
     }
 
-    if (total >= 7) {
-      return "hsl(190, 80%, 75%)";
+    if (nexo.reacciones) {
+      return Object.values(nexo.reacciones).reduce(
+        (total, cantidad) => total + cantidad,
+        0
+      );
     }
 
-    if (total >= 3) {
-      return "hsl(45, 90%, 78%)";
-    }
-
-    return "white";
+    return 1;
   }
 
-  const pensamientos =
-    publicaciones.slice(0, 12);
+  function tamañoNexo(nexo) {
+    const total = reaccionTotal(nexo);
+
+    return Math.min(58, 28 + total * 1.2);
+  }
+
+  function seleccionarNexo(nexo, index) {
+    setSeleccionado({
+      ...nexo,
+      index,
+    });
+
+    setAcercamiento(true);
+  }
+
+  function volverOrigen() {
+    setSeleccionado(null);
+    setAcercamiento(false);
+  }
 
   return (
-    <main className="nexo">
+    <main className={acercamiento ? "nexo acercado" : "nexo"}>
+
+      {/* CABECERA */}
 
       <header className="header">
+        <div className="marca">NEXORA</div>
 
-        <div className="marca">
-          NEXORA
-        </div>
-
-        <Link
-          href="/perfil"
-          className="perfil-link"
-          aria-label="Perfil"
-        >
+        <Link href="/perfil" className="perfil-link">
           ◉
         </Link>
-
       </header>
 
-      <section className="bienvenida">
 
+      {/* BIENVENIDA */}
+
+      <section className="bienvenida">
         <p className="pequeno">
           EL NEXO
         </p>
@@ -194,274 +114,333 @@ export default function Nexo() {
         <p className="frase">
           Todo está conectado.
         </p>
-
       </section>
+
+
+      {/* GALAXIA */}
 
       <section className="cosmo">
 
-        <div className="orbita orbita-1" />
-        <div className="orbita orbita-2" />
-        <div className="orbita orbita-3" />
+        <div className="espacio espacio-1" />
+        <div className="espacio espacio-2" />
+        <div className="espacio espacio-3" />
 
-        {pensamientos.map(
-          (publicacion, index) => {
 
-            const posicion =
-              POSICIONES[
-                index % POSICIONES.length
-              ];
+        {/* ESTRELLAS DE FONDO */}
 
-            const tamaño =
-              tamañoNodo(publicacion);
+        <div className="estrellas">
+          {Array.from({ length: 35 }).map((_, i) => (
+            <i
+              key={i}
+              style={{
+                left: `${(i * 37) % 100}%`,
+                top: `${(i * 61) % 100}%`,
+                animationDelay: `${(i % 7) * .4}s`,
+              }}
+            />
+          ))}
+        </div>
 
-            const color =
-              colorNodo(publicacion);
 
-            const intensidad =
-              intensidadNodo(publicacion);
-
-            return (
-              <div
-                key={publicacion.id}
-                className="nodo"
-                style={{
-                  left: `${posicion.x}%`,
-                  top: `${posicion.y}%`,
-                  "--delay": `${index * 0.5}s`,
-                }}
-                onClick={() =>
-                  setSeleccionado(
-                    publicacion
-                  )
-                }
-              >
-
-                <div
-                  className="nodo-luz"
-                  style={{
-                    width: tamaño,
-                    height: tamaño,
-                    color:
-                      color === "white"
-                        ? "black"
-                        : "white",
-                    background:
-                      color,
-                    opacity: intensidad,
-                    boxShadow: `
-                      0 0 15px ${color},
-                      0 0 40px ${color},
-                      0 0 75px ${color}
-                    `,
-                  }}
-                >
-                  ◉
-                </div>
-
-                <span>
-                  {publicacion.nombre}
-                </span>
-
-              </div>
-            );
-          }
-        )}
+        {/* LÍNEAS */}
 
         <div className="lineas">
 
-          {pensamientos.map(
-            (publicacion, index) => {
+          {conexiones.map((nexo, index) => {
+            const posicion =
+              posiciones[index % posiciones.length];
 
-              const posicion =
-                POSICIONES[
-                  index % POSICIONES.length
-                ];
-
-              return (
-                <svg
-                  key={`linea-${publicacion.id}`}
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-                  <line
-                    x1="50"
-                    y1="50"
-                    x2={posicion.x}
-                    y2={posicion.y}
-                  />
-                </svg>
-              );
-            }
-          )}
+            return (
+              <svg
+                key={`linea-${index}`}
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <line
+                  x1="50"
+                  y1="50"
+                  x2={posicion.x}
+                  y2={posicion.y}
+                  style={{
+                    animationDelay:
+                      `${index * .5}s`,
+                  }}
+                />
+              </svg>
+            );
+          })}
 
         </div>
 
+
+        {/* NODOS */}
+
+        {conexiones.map((nexo, index) => {
+
+          const posicion =
+            posiciones[index % posiciones.length];
+
+          const total =
+            reaccionTotal(nexo);
+
+          const size =
+            tamañoNexo(nexo);
+
+          const color =
+            total > 25
+              ? "intenso"
+              : total > 15
+              ? "medio"
+              : "suave";
+
+          return (
+            <button
+              key={`${nexo.persona}-${index}`}
+              className={`nodo ${color}`}
+              style={{
+                left: `${posicion.x}%`,
+                top: `${posicion.y}%`,
+                "--delay": `${index * .5}s`,
+                "--size": `${size}px`,
+              }}
+              onClick={() =>
+                seleccionarNexo(nexo, index)
+              }
+            >
+
+              <div className="nodo-luz">
+                ◉
+              </div>
+
+              {nexos.length > 0 && (
+                <span>
+                  {nexo.persona}
+                </span>
+              )}
+
+            </button>
+          );
+        })}
+
+
         {/* ORIGEN */}
 
-        <Link
-          href="/nexo"
+        <button
           className="origen"
-          aria-label="Origen"
+          onClick={volverOrigen}
+          aria-label="Volver al origen"
         >
 
-          <div className="brujula">
-
-            <div className="aguja">
-              ↑
-            </div>
-
-            <div className="punto">
-              ·
-            </div>
-
-          </div>
-
-          <span>
-            ORIGEN
-          </span>
-
-        </Link>
-
-        {pensamientos.length === 0 && (
-          <div className="galaxia-vacia">
-
-            <div className="vacio-luz">
+          <div className="origen-anillo">
+            <div className="origen-luz">
               ◎
             </div>
 
-            <p>
-              Tu galaxia está esperando
-              <br />
-              su primera conexión.
-            </p>
+            <span className="punto norte">
+              ·
+            </span>
 
-            <Link href="/crear">
-              CREAR PENSAMIENTO
-            </Link>
+            <span className="punto sur">
+              ·
+            </span>
 
+            <span className="punto este">
+              ·
+            </span>
+
+            <span className="punto oeste">
+              ·
+            </span>
           </div>
-        )}
+
+          <small>
+            ORIGEN
+          </small>
+
+        </button>
 
       </section>
 
-      {/* PENSAMIENTO SELECCIONADO */}
+
+      {/* NEXO SELECCIONADO */}
 
       {seleccionado && (
-        <section className="pensamiento-abierto">
 
-          <button
-            className="cerrar"
-            onClick={() =>
-              setSeleccionado(null)
-            }
-          >
-            ×
-          </button>
+        <section className="nexo-abierto">
 
-          <div className="autor">
-            ◉ {seleccionado.nombre}
+          <div className="abierto-arriba">
+
+            <span>
+              NEXO {seleccionado.index + 1}
+            </span>
+
+            <button
+              onClick={volverOrigen}
+            >
+              ×
+            </button>
+
           </div>
 
-          <p className="texto">
-            {seleccionado.texto}
+          <div className="abierto-luz">
+            ◉
+          </div>
+
+          <h2>
+            {seleccionado.persona}
+          </h2>
+
+          <p>
+            Esta conexión está creciendo.
           </p>
 
-          <div className="reacciones">
+          <div className="energia">
+            <span>
+              ✦
+            </span>
 
-            {REACCIONES.map(
-              (simbolo) => {
-
-                const cantidad =
-                  seleccionado.reacciones?.[
-                    simbolo
-                  ] || 0;
-
-                return (
-                  <button
-                    key={simbolo}
-                    onClick={() =>
-                      reaccionar(
-                        seleccionado.id,
-                        simbolo
-                      )
-                    }
-                  >
-                    <span>
-                      {simbolo}
-                    </span>
-
-                    <small>
-                      {cantidad}
-                    </small>
-                  </button>
-                );
-              }
-            )}
-
+            {reaccionTotal(seleccionado)}
+            {" "}
+            reacciones
           </div>
 
-          <div className="conexiones">
-            {totalReacciones(
-              seleccionado
-            )}{" "}
-            conexiones
+          <div className="abierto-acciones">
+
+            <button>
+              ✦ REACCIONAR
+            </button>
+
+            <button>
+              ∞ CONECTAR
+            </button>
+
           </div>
 
         </section>
+
       )}
 
-      <section className="acciones">
+
+      {/* PENSAMIENTOS */}
+
+      {!seleccionado && (
+
+        <section className="pensamientos">
+
+          <div className="titulo">
+
+            <span>
+              FLUJO DEL NEXO
+            </span>
+
+            <small>
+              {publicaciones.length}
+            </small>
+
+          </div>
+
+
+          {publicaciones.length === 0 ? (
+
+            <div className="vacio">
+
+              <div className="vacio-luz">
+                ◉
+              </div>
+
+              <p>
+                El nexo está esperando
+                <br />
+                tu primera conexión.
+              </p>
+
+              <Link href="/crear">
+                CREAR PENSAMIENTO
+              </Link>
+
+            </div>
+
+          ) : (
+
+            <div className="lista">
+
+              {publicaciones
+                .slice(0, 5)
+                .map((publicacion) => (
+
+                  <article
+                    key={publicacion.id}
+                    className="pensamiento"
+                  >
+
+                    <div className="autor">
+                      ◉ {publicacion.nombre}
+                    </div>
+
+                    <p>
+                      {publicacion.texto}
+                    </p>
+
+                    <div className="reacciones">
+
+                      {Object.entries(
+                        publicacion.reacciones || {}
+                      ).map(
+                        ([simbolo, cantidad]) => (
+                          <span key={simbolo}>
+                            {simbolo} {cantidad}
+                          </span>
+                        )
+                      )}
+
+                    </div>
+
+                  </article>
+
+                ))}
+
+            </div>
+
+          )}
+
+        </section>
+
+      )}
+
+
+      {/* BOTONES LATERALES */}
+
+      <div className="controles">
 
         <Link
           href="/crear"
-          className="accion crear"
-        >
-          <span>＋</span>
-          <small>CREAR</small>
-        </Link>
-
-        <Link
-          href="/explorar"
-          className="accion"
-        >
-          <span>✦</span>
-          <small>EXPLORAR</small>
-        </Link>
-
-      </section>
-
-      <nav className="nav">
-
-        <Link
-          href="/nexo"
-          className="activo"
-          aria-label="Nexo"
-        >
-          ⌂
-        </Link>
-
-        <Link
-          href="/explorar"
-          aria-label="Explorar"
-        >
-          ✦
-        </Link>
-
-        <Link
-          href="/crear"
-          aria-label="Crear"
+          className="control crear"
+          title="Crear"
         >
           ＋
         </Link>
 
         <Link
-          href="/perfil"
-          aria-label="Perfil"
+          href="/explorar"
+          className="control explorar"
+          title="Explorar"
         >
-          ◉
+          ✦
         </Link>
 
-      </nav>
+      </div>
+
+
+      {/* PERFIL */}
+
+      <Link
+        href="/perfil"
+        className="control perfil"
+        title="Perfil"
+      >
+        ◉
+      </Link>
+
 
       <style jsx>{`
 
@@ -469,16 +448,18 @@ export default function Nexo() {
           min-height: 100vh;
           background:
             radial-gradient(
-              circle at 50% 25%,
-              #242430 0%,
-              #09090d 42%,
-              #020203 100%
+              circle at 50% 28%,
+              #20202a 0%,
+              #09090d 38%,
+              #020203 75%,
+              #000 100%
             );
           color: white;
           font-family: Arial, sans-serif;
-          padding-bottom: 100px;
+          padding-bottom: 80px;
           overflow-x: hidden;
         }
+
 
         .header {
           height: 65px;
@@ -495,15 +476,13 @@ export default function Nexo() {
         }
 
         .perfil-link {
-          color: white;
-          text-decoration: none;
-          font-size: 20px;
-          opacity: .65;
+          display: none;
         }
+
 
         .bienvenida {
           text-align: center;
-          padding: 30px 20px 0;
+          padding: 28px 20px 5px;
         }
 
         .pequeno {
@@ -523,51 +502,85 @@ export default function Nexo() {
         .frase {
           margin-top: 8px;
           font-size: 12px;
-          opacity: .35;
+          opacity: .4;
         }
+
+
+        /* GALAXIA */
 
         .cosmo {
           position: relative;
-          width: min(94vw, 620px);
-          height: min(94vw, 620px);
-          margin: 5px auto 5px;
+          width: min(92vw, 620px);
+          height: min(92vw, 620px);
+          max-height: 560px;
+          margin: 5px auto 25px;
           border-radius: 50%;
+          transition:
+            transform .8s ease,
+            filter .8s ease;
         }
 
-        .orbita {
+        .acercado .cosmo {
+          transform: scale(1.05);
+        }
+
+
+        .espacio {
           position: absolute;
           left: 50%;
           top: 50%;
-          border: 1px solid rgba(255,255,255,.07);
           border-radius: 50%;
           transform: translate(-50%, -50%);
+          border: 1px solid rgba(255,255,255,.07);
           pointer-events: none;
         }
 
-        .orbita-1 {
+        .espacio-1 {
           width: 40%;
           height: 40%;
-          animation: girar 18s linear infinite;
+          animation: girar 20s linear infinite;
         }
 
-        .orbita-2 {
-          width: 65%;
-          height: 65%;
-          animation: girar 30s linear infinite reverse;
+        .espacio-2 {
+          width: 66%;
+          height: 66%;
+          animation: girar 32s linear infinite reverse;
         }
 
-        .orbita-3 {
+        .espacio-3 {
           width: 92%;
           height: 92%;
           border-color: rgba(255,255,255,.035);
-          animation: girar 45s linear infinite;
+          animation: girar 48s linear infinite;
         }
+
+
+        /* ESTRELLAS */
+
+        .estrellas {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          border-radius: 50%;
+        }
+
+        .estrellas i {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          opacity: .25;
+          animation: estrella 3s ease-in-out infinite;
+        }
+
+
+        /* LÍNEAS */
 
         .lineas {
           position: absolute;
           inset: 0;
           z-index: 1;
-          pointer-events: none;
         }
 
         .lineas svg {
@@ -578,19 +591,28 @@ export default function Nexo() {
         }
 
         .lineas line {
-          stroke: rgba(255,255,255,.16);
+          stroke: rgba(255,255,255,.2);
           stroke-width: .3;
           stroke-dasharray: 1 2;
           animation: linea 3s ease-in-out infinite;
         }
 
+
+        /* NODOS */
+
         .nodo {
           position: absolute;
+          width: 70px;
+          height: 70px;
           transform: translate(-50%, -50%);
+          background: transparent;
+          border: 0;
+          color: white;
           z-index: 5;
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           gap: 5px;
           cursor: pointer;
           animation: flotar 4s ease-in-out infinite;
@@ -598,9 +620,15 @@ export default function Nexo() {
         }
 
         .nodo-luz {
+          width: var(--size);
+          height: var(--size);
           min-width: 24px;
           min-height: 24px;
+          max-width: 58px;
+          max-height: 58px;
           border-radius: 50%;
+          background: white;
+          color: black;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -608,113 +636,150 @@ export default function Nexo() {
           transition:
             width .5s ease,
             height .5s ease,
-            background .5s ease,
-            box-shadow .5s ease,
-            transform .3s ease;
+            box-shadow .5s ease;
+        }
+
+        .nodo.suave .nodo-luz {
+          box-shadow:
+            0 0 12px white,
+            0 0 30px rgba(255,255,255,.35);
+        }
+
+        .nodo.medio .nodo-luz {
+          box-shadow:
+            0 0 18px white,
+            0 0 45px rgba(170,190,255,.45);
+        }
+
+        .nodo.intenso .nodo-luz {
+          box-shadow:
+            0 0 25px white,
+            0 0 65px rgba(210,220,255,.7),
+            0 0 100px rgba(255,255,255,.2);
         }
 
         .nodo:hover .nodo-luz {
-          transform: scale(1.12);
+          transform: scale(1.15);
         }
 
         .nodo span {
-          font-size: 8px;
-          opacity: .45;
+          font-size: 9px;
+          opacity: .5;
           white-space: nowrap;
-          max-width: 75px;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
+
+
+        /* ORIGEN */
 
         .origen {
           position: absolute;
           left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
-          z-index: 8;
-          width: 92px;
-          height: 92px;
-          border-radius: 50%;
+          width: 105px;
+          height: 105px;
+          background: transparent;
+          border: 0;
           color: white;
-          text-decoration: none;
+          z-index: 8;
+          cursor: pointer;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          gap: 5px;
         }
 
-        .brujula {
-          width: 68px;
-          height: 68px;
-          border: 1px solid rgba(255,255,255,.65);
-          border-radius: 50%;
+        .origen-anillo {
           position: relative;
+          width: 82px;
+          height: 82px;
+          border: 1px solid rgba(255,255,255,.25);
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
+          animation: brujula 14s linear infinite;
+        }
+
+        .origen-luz {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: white;
+          color: black;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
           box-shadow:
-            0 0 20px rgba(255,255,255,.12);
-          transition: .3s ease;
-        }
-
-        .origen:hover .brujula {
-          transform: scale(1.08);
-          box-shadow:
-            0 0 30px rgba(255,255,255,.3);
-        }
-
-        .brujula::before,
-        .brujula::after {
-          content: "";
-          position: absolute;
-          background: rgba(255,255,255,.2);
-        }
-
-        .brujula::before {
-          width: 1px;
-          height: 100%;
-        }
-
-        .brujula::after {
-          width: 100%;
-          height: 1px;
-        }
-
-        .aguja {
-          position: relative;
-          z-index: 2;
-          font-size: 25px;
-          line-height: 1;
+            0 0 25px white,
+            0 0 60px rgba(255,255,255,.5);
+          animation: respirar 3.5s ease-in-out infinite;
         }
 
         .punto {
           position: absolute;
-          font-size: 18px;
-          z-index: 3;
+          font-size: 22px;
         }
 
-        .origen > span {
-          font-size: 7px;
+        .norte {
+          top: -16px;
+        }
+
+        .sur {
+          bottom: -16px;
+        }
+
+        .este {
+          right: -12px;
+        }
+
+        .oeste {
+          left: -12px;
+        }
+
+        .origen small {
+          margin-top: 13px;
+          font-size: 8px;
           letter-spacing: 3px;
           opacity: .5;
         }
 
-        .galaxia-vacia {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          width: 240px;
+
+        /* PANEL */
+
+        .nexo-abierto {
+          width: min(90%, 500px);
+          margin: -5px auto 35px;
+          padding: 25px;
+          box-sizing: border-box;
+          border: 1px solid #292929;
+          border-radius: 24px;
+          background: rgba(255,255,255,.035);
           text-align: center;
-          z-index: 3;
-          pointer-events: none;
+          animation: aparecer .5s ease;
         }
 
-        .vacio-luz {
-          width: 35px;
-          height: 35px;
-          margin: auto;
+        .abierto-arriba {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 9px;
+          letter-spacing: 3px;
+          opacity: .4;
+        }
+
+        .abierto-arriba button {
+          border: 0;
+          background: transparent;
+          color: white;
+          font-size: 25px;
+          cursor: pointer;
+        }
+
+        .abierto-luz {
+          width: 65px;
+          height: 65px;
+          margin: 20px auto 15px;
           border-radius: 50%;
           background: white;
           color: black;
@@ -722,172 +787,189 @@ export default function Nexo() {
           align-items: center;
           justify-content: center;
           box-shadow:
-            0 0 25px rgba(255,255,255,.45);
+            0 0 25px white,
+            0 0 60px rgba(255,255,255,.5);
         }
 
-        .galaxia-vacia p {
-          font-size: 11px;
-          line-height: 1.6;
-          opacity: .35;
+        .nexo-abierto h2 {
+          font-weight: 300;
+          letter-spacing: 3px;
+          margin: 0;
         }
 
-        .galaxia-vacia a {
-          pointer-events: auto;
-          display: inline-block;
-          margin-top: 7px;
-          padding: 9px 14px;
+        .nexo-abierto p {
+          opacity: .4;
+          font-size: 12px;
+        }
+
+        .energia {
+          display: inline-flex;
+          gap: 8px;
+          padding: 9px 15px;
           border: 1px solid #333;
-          border-radius: 20px;
+          border-radius: 30px;
+          font-size: 11px;
+          opacity: .65;
+        }
+
+        .abierto-acciones {
+          display: flex;
+          gap: 10px;
+          margin-top: 20px;
+        }
+
+        .abierto-acciones button {
+          flex: 1;
+          padding: 12px;
+          border: 1px solid #333;
+          border-radius: 25px;
+          background: transparent;
           color: white;
-          text-decoration: none;
-          font-size: 8px;
+          font-size: 9px;
           letter-spacing: 1px;
         }
 
-        .pensamiento-abierto {
-          position: relative;
-          width: min(88%, 470px);
-          margin: 5px auto 20px;
-          padding: 25px;
-          box-sizing: border-box;
-          border: 1px solid #333;
-          border-radius: 22px;
-          background: rgba(10,10,14,.85);
-          backdrop-filter: blur(15px);
-          animation: aparecer .35s ease;
+
+        /* PENSAMIENTOS */
+
+        .pensamientos {
+          width: min(92%, 600px);
+          margin: auto;
         }
 
-        .cerrar {
-          position: absolute;
-          top: 12px;
-          right: 15px;
-          border: none;
-          background: transparent;
+        .titulo {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          font-size: 10px;
+          letter-spacing: 3px;
+          opacity: .6;
+        }
+
+        .titulo small {
+          letter-spacing: 0;
+        }
+
+        .vacio {
+          padding: 35px 20px;
+          text-align: center;
+          border: 1px solid #222;
+          border-radius: 20px;
+          background: rgba(255,255,255,.02);
+        }
+
+        .vacio-luz {
+          width: 42px;
+          height: 42px;
+          margin: auto;
+          border-radius: 50%;
+          background: white;
+          color: black;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 0 25px rgba(255,255,255,.5);
+        }
+
+        .vacio p {
+          font-size: 12px;
+          line-height: 1.6;
+          opacity: .4;
+        }
+
+        .vacio a {
+          display: inline-block;
+          margin-top: 10px;
+          padding: 10px 16px;
+          border: 1px solid #444;
+          border-radius: 25px;
           color: white;
-          font-size: 22px;
-          opacity: .5;
-          cursor: pointer;
+          text-decoration: none;
+          font-size: 8px;
+          letter-spacing: 2px;
+        }
+
+        .lista {
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+        }
+
+        .pensamiento {
+          padding: 17px;
+          border: 1px solid #222;
+          border-radius: 17px;
+          background: rgba(255,255,255,.025);
         }
 
         .autor {
-          font-size: 10px;
-          opacity: .45;
+          font-size: 9px;
+          opacity: .4;
         }
 
-        .texto {
-          margin: 18px 0;
-          font-size: 18px;
-          line-height: 1.5;
+        .pensamiento p {
+          margin: 12px 0;
+          font-size: 15px;
+          line-height: 1.45;
         }
 
         .reacciones {
           display: flex;
-          justify-content: center;
-          gap: 10px;
-        }
-
-        .reacciones button {
-          min-width: 52px;
-          padding: 8px 10px;
-          border: 1px solid #333;
-          border-radius: 20px;
-          background: rgba(255,255,255,.03);
-          color: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-        }
-
-        .reacciones button:hover {
-          border-color: #777;
-          background: rgba(255,255,255,.08);
-        }
-
-        .reacciones button span {
-          font-size: 17px;
-        }
-
-        .reacciones button small {
+          gap: 13px;
           font-size: 9px;
-          opacity: .5;
-        }
-
-        .conexiones {
-          margin-top: 15px;
-          text-align: center;
-          font-size: 9px;
-          letter-spacing: 2px;
           opacity: .35;
         }
 
-        .acciones {
-          width: min(88%, 470px);
-          margin: 10px auto 25px;
-          display: flex;
-          justify-content: center;
-          gap: 10px;
-        }
 
-        .accion {
-          color: white;
-          text-decoration: none;
-          width: 80px;
-          height: 45px;
-          border: 1px solid #292929;
-          border-radius: 25px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 7px;
-          background: rgba(255,255,255,.02);
-        }
+        /* CONTROLES */
 
-        .accion span {
-          font-size: 18px;
-        }
-
-        .accion small {
-          font-size: 8px;
-          letter-spacing: 1px;
-          opacity: .55;
-        }
-
-        .accion.crear {
-          border-color: rgba(255,255,255,.25);
-        }
-
-        .nav {
+        .controles {
           position: fixed;
-          left: 20px;
-          right: 20px;
-          bottom: 18px;
-          height: 50px;
-          max-width: 300px;
-          margin: auto;
-          background: rgba(5,5,7,.75);
-          border: 1px solid #292929;
-          border-radius: 30px;
-          backdrop-filter: blur(15px);
-          display: flex;
-          align-items: center;
-          justify-content: space-around;
-          z-index: 20;
+          left: 22px;
+          right: 22px;
+          top: 50%;
+          pointer-events: none;
+          z-index: 30;
         }
 
-        .nav a {
+        .control {
+          position: fixed;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,.2);
+          background: rgba(5,5,5,.7);
+          backdrop-filter: blur(8px);
           color: white;
           text-decoration: none;
-          font-size: 18px;
-          opacity: .45;
-          padding: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 21px;
+          box-sizing: border-box;
+          transition: .3s ease;
         }
 
-        .nav a.activo {
-          opacity: 1;
-          text-shadow: 0 0 15px white;
+        .control:hover {
+          border-color: white;
+          box-shadow: 0 0 20px rgba(255,255,255,.2);
         }
+
+        .crear {
+          left: 22px;
+          bottom: 28px;
+        }
+
+        .explorar {
+          right: 22px;
+          bottom: 28px;
+        }
+
+        .perfil {
+          right: 22px;
+          top: 90px;
+        }
+
 
         @keyframes respirar {
           0%,100% {
@@ -915,7 +997,7 @@ export default function Nexo() {
           }
 
           50% {
-            opacity: .75;
+            opacity: .8;
           }
         }
 
@@ -933,10 +1015,32 @@ export default function Nexo() {
           }
         }
 
+        @keyframes brujula {
+          from {
+            transform: rotate(0deg);
+          }
+
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes estrella {
+          0%,100% {
+            opacity: .15;
+            transform: scale(1);
+          }
+
+          50% {
+            opacity: .7;
+            transform: scale(1.7);
+          }
+        }
+
         @keyframes aparecer {
           from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(12px);
           }
 
           to {
@@ -945,6 +1049,7 @@ export default function Nexo() {
           }
         }
 
+
         @media (max-width: 500px) {
 
           .cosmo {
@@ -952,20 +1057,35 @@ export default function Nexo() {
             height: 96vw;
           }
 
-          .bienvenida {
-            padding-top: 25px;
+          .nodo {
+            width: 55px;
+            height: 55px;
           }
 
-          .nodo span {
-            font-size: 7px;
+          .origen {
+            transform:
+              translate(-50%, -50%)
+              scale(.85);
           }
 
-          .pensamiento-abierto {
-            margin-top: 0;
+          .control {
+            width: 44px;
+            height: 44px;
           }
 
-          .nav {
-            bottom: 12px;
+          .crear {
+            left: 15px;
+            bottom: 20px;
+          }
+
+          .explorar {
+            right: 15px;
+            bottom: 20px;
+          }
+
+          .perfil {
+            right: 15px;
+            top: 82px;
           }
 
         }
