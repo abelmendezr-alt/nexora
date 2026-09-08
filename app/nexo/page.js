@@ -1,11 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Nexo() {
   const [publicaciones, setPublicaciones] = useState([]);
   const [destacada, setDestacada] = useState(null);
-  const [zoom, setZoom] = useState(false);
+  const [zoomInicial, setZoomInicial] = useState(false);
+  const [escala, setEscala] = useState(1);
+  const [posicion, setPosicion] = useState({ x: 0, y: 0 });
+
+  const galaxiaRef = useRef(null);
+
+  const tocando = useRef(false);
+  const moviendo = useRef(false);
+
+  const inicio = useRef({ x: 0, y: 0 });
+  const posicionInicial = useRef({ x: 0, y: 0 });
+
+  const distanciaInicial = useRef(null);
+  const escalaInicial = useRef(1);
 
   useEffect(() => {
     const guardadas = JSON.parse(
@@ -32,7 +45,7 @@ export default function Nexo() {
       setDestacada(mayor);
 
       setTimeout(() => {
-        setZoom(true);
+        setZoomInicial(true);
       }, 800);
     }
   }, []);
@@ -69,6 +82,11 @@ export default function Nexo() {
     );
   }
 
+  function seleccionarPensamiento(publicacion) {
+    setDestacada(publicacion);
+    setZoomInicial(false);
+  }
+
   function obtenerColores(reacciones) {
     const colores = [];
 
@@ -89,36 +107,140 @@ export default function Nexo() {
     }
 
     if (colores.length === 0) {
-      return "white";
+      return "rgba(255,255,255,0.8)";
     }
 
-    return colores.join(", ");
+    return colores[0];
+  }
+
+  function distancia(a, b) {
+    const dx = a.clientX - b.clientX;
+    const dy = a.clientY - b.clientY;
+
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function tocarInicio(e) {
+    if (e.touches.length === 1) {
+      tocando.current = true;
+      moviendo.current = false;
+
+      inicio.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+
+      posicionInicial.current = {
+        ...posicion,
+      };
+    }
+
+    if (e.touches.length === 2) {
+      distanciaInicial.current = distancia(
+        e.touches[0],
+        e.touches[1]
+      );
+
+      escalaInicial.current = escala;
+    }
+  }
+
+  function tocarMover(e) {
+    if (e.touches.length === 1 && tocando.current) {
+      const dx =
+        e.touches[0].clientX - inicio.current.x;
+
+      const dy =
+        e.touches[0].clientY - inicio.current.y;
+
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        moviendo.current = true;
+      }
+
+      setPosicion({
+        x: posicionInicial.current.x + dx,
+        y: posicionInicial.current.y + dy,
+      });
+    }
+
+    if (
+      e.touches.length === 2 &&
+      distanciaInicial.current
+    ) {
+      const nuevaDistancia = distancia(
+        e.touches[0],
+        e.touches[1]
+      );
+
+      const diferencia =
+        nuevaDistancia / distanciaInicial.current;
+
+      let nuevaEscala =
+        escalaInicial.current * diferencia;
+
+      nuevaEscala = Math.max(
+        0.5,
+        Math.min(3.5, nuevaEscala)
+      );
+
+      setEscala(nuevaEscala);
+    }
+  }
+
+  function tocarFinal() {
+    tocando.current = false;
   }
 
   return (
-    <main className={`cosmo ${zoom ? "zoom-activo" : ""}`}>
+    <main className="cosmo">
       <div className="titulo">NEXORA</div>
 
-      <div className="galaxia">
+      <div
+        ref={galaxiaRef}
+        className={`galaxia ${
+          zoomInicial ? "zoom-inicial" : ""
+        }`}
+        style={{
+          transform: `
+            translate(${posicion.x}px, ${posicion.y}px)
+            scale(${escala})
+          `,
+        }}
+        onTouchStart={tocarInicio}
+        onTouchMove={tocarMover}
+        onTouchEnd={tocarFinal}
+      >
         {publicaciones.map((publicacion, index) => {
-          const reacciones = publicacion.reacciones || {};
+          const reacciones =
+            publicacion.reacciones || {};
 
-          const total = Object.values(reacciones).reduce(
-            (suma, cantidad) => suma + cantidad,
+          const total = Object.values(
+            reacciones
+          ).reduce(
+            (suma, cantidad) =>
+              suma + cantidad,
             0
           );
 
           const esDestacada =
             destacada?.id === publicacion.id;
 
-          const colores = obtenerColores(reacciones);
+          const color =
+            obtenerColores(reacciones);
 
           return (
-            <div
+            <button
               key={publicacion.id}
               className={`pensamiento ${
                 esDestacada ? "destacada" : ""
               }`}
+              onClick={() => {
+                if (!moviendo.current) {
+                  seleccionarPensamiento(
+                    publicacion
+                  );
+                }
+              }}
               style={{
                 top: `${25 + (index * 17) % 55}%`,
                 left: `${20 + (index * 23) % 60}%`,
@@ -130,11 +252,11 @@ export default function Nexo() {
                   : `${35 + total * 4}px`,
                 background: "white",
                 boxShadow: `
-                 0 0 15px white,
-                 0 0 35px ${colores},
-                 0 0 70px ${colores},
-                 0 0 120px ${colores}
-               `,
+                  0 0 15px white,
+                  0 0 35px ${color},
+                  0 0 70px ${color},
+                  0 0 120px ${color}
+                `,
               }}
             />
           );
@@ -155,7 +277,9 @@ export default function Nexo() {
             ).map(([simbolo, cantidad]) => (
               <button
                 key={simbolo}
-                onClick={() => reaccionar(simbolo)}
+                onClick={() =>
+                  reaccionar(simbolo)
+                }
               >
                 {simbolo} {cantidad}
               </button>
@@ -201,6 +325,7 @@ export default function Nexo() {
           position: relative;
           overflow: hidden;
           font-family: Arial, sans-serif;
+          touch-action: none;
         }
 
         .titulo {
@@ -214,10 +339,12 @@ export default function Nexo() {
         .galaxia {
           position: absolute;
           inset: 0;
-          transition: transform 3s ease;
+          transition: transform 0.25s ease-out;
+          transform-origin: center center;
         }
 
-        .zoom-activo .galaxia {
+        .galaxia.zoom-inicial {
+          transition: transform 3s ease;
           transform: scale(2.2);
         }
 
@@ -225,11 +352,21 @@ export default function Nexo() {
           position: absolute;
           transform: translate(-50%, -50%);
           border-radius: 50%;
+          border: none;
+          padding: 0;
+          cursor: pointer;
           animation: respirar 4s ease-in-out infinite;
           transition:
             width 1s ease,
             height 1s ease,
             box-shadow 1s ease;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .pensamiento:active {
+          transform:
+            translate(-50%, -50%)
+            scale(0.9);
         }
 
         .pensamiento-info {
@@ -244,8 +381,7 @@ export default function Nexo() {
           border: 1px solid #333;
           border-radius: 20px;
           z-index: 10;
-          opacity: 0;
-          animation: aparecer 1.5s ease 2s forwards;
+          backdrop-filter: blur(10px);
         }
 
         .autor {
@@ -318,27 +454,21 @@ export default function Nexo() {
 
         @keyframes respirar {
           0% {
-            transform: translate(-50%, -50%) scale(1);
+            transform:
+              translate(-50%, -50%)
+              scale(1);
           }
 
           50% {
-            transform: translate(-50%, -50%) scale(1.12);
+            transform:
+              translate(-50%, -50%)
+              scale(1.12);
           }
 
           100% {
-            transform: translate(-50%, -50%) scale(1);
-          }
-        }
-
-        @keyframes aparecer {
-          from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(15px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform:
+              translate(-50%, -50%)
+              scale(1);
           }
         }
       `}</style>
