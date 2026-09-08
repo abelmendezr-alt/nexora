@@ -121,9 +121,11 @@ export default function Nexo() {
               borderRadius: "18px",
             }}
           >
-            <div style={{ opacity: 0.5 }}>
-              ◉ Tú
-            </div>
+      <div style={{ opacity: 0.5 }}>
+  ◉ {typeof window !== "undefined"
+    ? localStorage.getItem("nexora_nombre") || "Tú"
+    : "Tú"}
+</div>
 
             <p
               style={{
