@@ -7,6 +7,7 @@ export default function Home() {
       <p>Todo está conectado.</p>
 
       <Link href="/entrar">Entrar</Link>
+      <br />
       <Link href="/nexo">Explorar el nexo</Link>
     </main>
   );
