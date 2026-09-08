@@ -1,149 +1,129 @@
 "use client";
 
 import { useState } from "react";
-import { nexoraData } from "../../data";
+import Link from "next/link";
 
-const posiciones = [
-  { x: 30, y: 35 },
-  { x: 70, y: 45 },
-  { x: 50, y: 70 },
-];
-
-const estrellas = [
-  { x: 12, y: 20, r: 0.7 },
-  { x: 82, y: 18, r: 0.5 },
-  { x: 18, y: 55, r: 0.6 },
-  { x: 85, y: 58, r: 0.8 },
-  { x: 25, y: 82, r: 0.5 },
-  { x: 78, y: 80, r: 0.6 },
-  { x: 50, y: 12, r: 0.5 },
-];
-
-export default function Cosmos() {
-  const [seleccionado, setSeleccionado] = useState(null);
+export default function Home() {
+  const [encendido, setEncendido] = useState(false);
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        overflow: "hidden",
-        background:
-          "radial-gradient(circle at center, #191923 0%, #050507 75%)",
-        color: "white",
-        textAlign: "center",
-        padding: "30px",
-      }}
-    >
-      <h1>COSMOS</h1>
+    <main className={encendido ? "inicio activo" : "inicio"}>
+      <div className="luz"></div>
 
-      <p>El nexo se expande.</p>
+      <section className="contenido">
+        <h1>NEXORA</h1>
 
-      <svg
-        viewBox="0 0 100 100"
-        style={{
-          width: "100%",
-          maxWidth: "500px",
-          height: "65vh",
-        }}
-      >
-        {estrellas.map((estrella, index) => (
-          <circle
-            key={index}
-            cx={estrella.x}
-            cy={estrella.y}
-            r={estrella.r}
-            fill="#aaa"
-            opacity="0.7"
-          />
-        ))}
+        <p>Todo está conectado.</p>
 
-        <line x1="30" y1="35" x2="70" y2="45" stroke="#444" />
-        <line x1="70" y1="45" x2="50" y2="70" stroke="#444" />
-        <line x1="50" y1="70" x2="30" y2="35" stroke="#444" />
-
-        {nexoraData.publicaciones.map((publicacion, index) => {
-          const posicion = posiciones[index];
-
-          return (
-            <g
-              key={publicacion.id}
-              style={{
-                cursor: "pointer",
-                animation: `flotar${index} ${
-                  3 + index
-                }s ease-in-out infinite`,
-              }}
-              onClick={() =>
-                setSeleccionado(publicacion.id)
-              }
-            >
-              <circle
-                cx={posicion.x}
-                cy={posicion.y}
-                r="7"
-                fill="#aaa"
-                opacity="0.12"
-              />
-
-              <circle
-                cx={posicion.x}
-                cy={posicion.y}
-                r="4"
-                fill={
-                  seleccionado === publicacion.id
-                    ? "white"
-                    : "#aaa"
-                }
-              />
-            </g>
-          );
-        })}
-      </svg>
-
-      {seleccionado && (
-        <section>
-          <p>
-            {
-              nexoraData.publicaciones.find(
-                (publicacion) =>
-                  publicacion.id === seleccionado
-              )?.texto
-            }
-          </p>
-        </section>
-      )}
+        <Link
+          href="/entrar"
+          className="entrar"
+          onClick={() => setEncendido(true)}
+        >
+          Entrar
+        </Link>
+      </section>
 
       <style jsx>{`
-        @keyframes flotar0 {
-          0%,
-          100% {
-            transform: translate(0, 0);
+        .inicio {
+          min-height: 100vh;
+          background: #000;
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+          position: relative;
+          font-family: Arial, sans-serif;
+        }
+
+        .contenido {
+          position: relative;
+          z-index: 2;
+          text-align: center;
+          animation: aparecer 2.5s ease;
+        }
+
+        h1 {
+          font-size: clamp(38px, 9vw, 68px);
+          font-weight: 300;
+          letter-spacing: 0.32em;
+          margin: 0;
+        }
+
+        p {
+          margin-top: 18px;
+          color: #777;
+          font-size: 13px;
+          letter-spacing: 0.12em;
+        }
+
+        .entrar {
+          display: inline-block;
+          margin-top: 45px;
+          padding: 13px 42px;
+          border: 1px solid #444;
+          border-radius: 999px;
+          color: white;
+          text-decoration: none;
+          font-size: 14px;
+          transition: all 0.4s ease;
+        }
+
+        .entrar:hover {
+          background: white;
+          color: black;
+        }
+
+        .luz {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: white;
+          box-shadow:
+            0 0 25px white,
+            0 0 80px white;
+          opacity: 0;
+        }
+
+        .activo .luz {
+          animation: despertar 1.2s ease forwards;
+        }
+
+        .activo .contenido {
+          animation: desaparecer 0.7s ease forwards;
+        }
+
+        @keyframes despertar {
+          0% {
+            transform: scale(1);
+            opacity: 0;
           }
 
-          50% {
-            transform: translate(2px, -3px);
+          20% {
+            opacity: 1;
+          }
+
+          100% {
+            transform: scale(45);
+            opacity: 0;
           }
         }
 
-        @keyframes flotar1 {
-          0%,
-          100% {
-            transform: translate(0, 0);
+        @keyframes aparecer {
+          from {
+            opacity: 0;
           }
 
-          50% {
-            transform: translate(-3px, 2px);
+          to {
+            opacity: 1;
           }
         }
 
-        @keyframes flotar2 {
-          0%,
-          100% {
-            transform: translate(0, 0);
-          }
-
-          50% {
-            transform: translate(2px, 2px);
+        @keyframes desaparecer {
+          to {
+            opacity: 0;
           }
         }
       `}</style>
