@@ -1,16 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Nexo() {
   const [texto, setTexto] = useState("");
-  const [publicacion, setPublicacion] = useState("");
+  const [publicaciones, setPublicaciones] = useState([]);
+
+  useEffect(() => {
+    const guardadas = localStorage.getItem("nexora_publicaciones");
+
+    if (guardadas) {
+      setPublicaciones(JSON.parse(guardadas));
+    }
+  }, []);
 
   function publicar() {
     if (!texto.trim()) return;
 
-    setPublicacion(texto);
+    const nombre =
+      localStorage.getItem("nexora_nombre") || "Usuario";
+
+    const nueva = {
+      id: Date.now(),
+      nombre,
+      texto: texto.trim(),
+      reacciones: {
+        "♡": 0,
+        "✦": 0,
+        "◉": 0,
+        "∞": 0,
+      },
+    };
+
+    const actualizadas = [nueva, ...publicaciones];
+
+    setPublicaciones(actualizadas);
+
+    localStorage.setItem(
+      "nexora_publicaciones",
+      JSON.stringify(actualizadas)
+    );
+
     setTexto("");
+  }
+
+  function reaccionar(id, simbolo) {
+    const actualizadas = publicaciones.map((publicacion) => {
+      if (publicacion.id !== id) return publicacion;
+
+      return {
+        ...publicacion,
+        reacciones: {
+          ...publicacion.reacciones,
+          [simbolo]: publicacion.reacciones[simbolo] + 1,
+        },
+      };
+    });
+
+    setPublicaciones(actualizadas);
+
+    localStorage.setItem(
+      "nexora_publicaciones",
+      JSON.stringify(actualizadas)
+    );
   }
 
   return (
@@ -20,33 +72,18 @@ export default function Nexo() {
         background: "#050505",
         color: "white",
         fontFamily: "Arial, sans-serif",
-        paddingBottom: "80px",
+        paddingBottom: "90px",
       }}
     >
-      {/* ENCABEZADO */}
-
       <header
         style={{
           padding: "22px",
           borderBottom: "1px solid #222",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          letterSpacing: "5px",
         }}
       >
-        <strong
-          style={{
-            letterSpacing: "5px",
-            fontSize: "20px",
-          }}
-        >
-          NEXORA
-        </strong>
-
-        <span style={{ opacity: 0.5 }}>◉</span>
+        NEXORA
       </header>
-
-      {/* CONTENIDO */}
 
       <section
         style={{
@@ -55,20 +92,13 @@ export default function Nexo() {
           padding: "25px 20px",
         }}
       >
-        <h2
-          style={{
-            fontWeight: "300",
-            letterSpacing: "3px",
-          }}
-        >
+        <h2 style={{ fontWeight: "300" }}>
           EL NEXO
         </h2>
 
         <p style={{ opacity: 0.5 }}>
           Lo que ocurre aquí empieza contigo.
         </p>
-
-        {/* PUBLICAR */}
 
         <div
           style={{
@@ -110,10 +140,9 @@ export default function Nexo() {
           </button>
         </div>
 
-        {/* PUBLICACIÓN */}
-
-        {publicacion && (
+        {publicaciones.map((publicacion) => (
           <article
+            key={publicacion.id}
             style={{
               marginTop: "30px",
               padding: "20px",
@@ -121,11 +150,9 @@ export default function Nexo() {
               borderRadius: "18px",
             }}
           >
-      <div style={{ opacity: 0.5 }}>
-  ◉ {typeof window !== "undefined"
-    ? localStorage.getItem("nexora_nombre") || "Tú"
-    : "Tú"}
-</div>
+            <div style={{ opacity: 0.5 }}>
+              ◉ {publicacion.nombre}
+            </div>
 
             <p
               style={{
@@ -133,48 +160,40 @@ export default function Nexo() {
                 fontSize: "18px",
               }}
             >
-              {publicacion}
+              {publicacion.texto}
             </p>
 
             <div
-  style={{
-    marginTop: "20px",
-    display: "flex",
-    gap: "12px",
-    flexWrap: "wrap",
-  }}
->
-  <button className="reaction">♡</button>
-  <button className="reaction">✦</button>
-  <button className="reaction">◉</button>
-  <button className="reaction">∞</button>
-</div>
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                gap: "10px",
+              }}
+            >
+              {Object.entries(publicacion.reacciones).map(
+                ([simbolo, cantidad]) => (
+                  <button
+                    key={simbolo}
+                    onClick={() =>
+                      reaccionar(publicacion.id, simbolo)
+                    }
+                    style={{
+                      background: "transparent",
+                      color: "white",
+                      border: "1px solid #333",
+                      borderRadius: "20px",
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {simbolo} {cantidad}
+                  </button>
+                )
+              )}
+            </div>
           </article>
-        )}
+        ))}
       </section>
-
-      {/* NAVEGACIÓN */}
-
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "65px",
-          background: "#050505",
-          borderTop: "1px solid #222",
-          display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
-          opacity: 0.8,
-        }}
-      >
-        <span>⌂</span>
-        <span>✦</span>
-        <span>＋</span>
-        <span>◉</span>
-      </nav>
     </main>
   );
 }
