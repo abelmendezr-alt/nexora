@@ -78,7 +78,7 @@ body {
     0 0 140px rgba(255, 255, 255, 0.8),
     0 0 280px rgba(255, 255, 255, 0.5);
 
-  animation: enterNexora 1.4s ease-in forwards;
+  animation: enterNexora 1.8s ease-in forwards;
 }
 
 @keyframes enterNexora {
@@ -87,13 +87,18 @@ body {
     opacity: 1;
   }
 
-  55% {
+  45% {
     transform: scale(4);
     opacity: 1;
   }
 
+  75% {
+    transform: scale(10);
+    opacity: 0.35;
+  }
+
   100% {
-    transform: scale(12);
+    transform: scale(14);
     opacity: 0;
   }
 }
