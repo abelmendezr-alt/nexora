@@ -135,15 +135,18 @@ export default function Nexo() {
             </p>
 
             <div
-              style={{
-                marginTop: "20px",
-                opacity: 0.6,
-                display: "flex",
-                gap: "25px",
-              }}
-            >
-              ♡ &nbsp; ✦ &nbsp; ◉
-            </div>
+  style={{
+    marginTop: "20px",
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+  }}
+>
+  <button className="reaction">♡</button>
+  <button className="reaction">✦</button>
+  <button className="reaction">◉</button>
+  <button className="reaction">∞</button>
+</div>
           </article>
         )}
       </section>
