@@ -37,13 +37,56 @@ export default function Nexo() {
     }
   }, []);
 
+  function reaccionar(simbolo) {
+    if (!destacada) return;
+
+    const actualizadas = publicaciones.map((publicacion) => {
+      if (publicacion.id !== destacada.id) {
+        return publicacion;
+      }
+
+      return {
+        ...publicacion,
+        reacciones: {
+          ...publicacion.reacciones,
+          [simbolo]:
+            (publicacion.reacciones?.[simbolo] || 0) + 1,
+        },
+      };
+    });
+
+    setPublicaciones(actualizadas);
+
+    const nuevaDestacada = actualizadas.find(
+      (publicacion) => publicacion.id === destacada.id
+    );
+
+    setDestacada(nuevaDestacada);
+
+    localStorage.setItem(
+      "nexora_publicaciones",
+      JSON.stringify(actualizadas)
+    );
+  }
+
   function obtenerColores(reacciones) {
     const colores = [];
 
-    if (reacciones["♡"] > 0) colores.push("rgba(255, 100, 180, 0.8)");
-    if (reacciones["✦"] > 0) colores.push("rgba(255, 210, 80, 0.8)");
-    if (reacciones["◉"] > 0) colores.push("rgba(80, 170, 255, 0.8)");
-    if (reacciones["∞"] > 0) colores.push("rgba(190, 100, 255, 0.8)");
+    if (reacciones["♡"] > 0) {
+      colores.push("rgba(255, 100, 180, 0.8)");
+    }
+
+    if (reacciones["✦"] > 0) {
+      colores.push("rgba(255, 210, 80, 0.8)");
+    }
+
+    if (reacciones["◉"] > 0) {
+      colores.push("rgba(80, 170, 255, 0.8)");
+    }
+
+    if (reacciones["∞"] > 0) {
+      colores.push("rgba(190, 100, 255, 0.8)");
+    }
 
     if (colores.length === 0) {
       return "white";
@@ -87,46 +130,17 @@ export default function Nexo() {
                   : `${35 + total * 4}px`,
                 background: "white",
                 boxShadow: `
-                 0 0 15px white,
-                 0 0 45px ${colores},
-                 0 0 100px ${colores},
-                 0 0 180px ${colores}
-               `,
+                  0 0 15px white,
+                  0 0 45px ${colores},
+                  0 0 100px ${colores},
+                  0 0 180px ${colores}
+                `,
               }}
             />
           );
         })}
       </div>
-function reaccionar(simbolo) {
-  if (!destacada) return;
 
-  const actualizadas = publicaciones.map((publicacion) => {
-    if (publicacion.id !== destacada.id) {
-      return publicacion;
-    }
-
-    return {
-      ...publicacion,
-      reacciones: {
-        ...publicacion.reacciones,
-        [simbolo]: (publicacion.reacciones?.[simbolo] || 0) + 1,
-      },
-    };
-  });
-
-  setPublicaciones(actualizadas);
-
-  const nuevaDestacada = actualizadas.find(
-    (publicacion) => publicacion.id === destacada.id
-  );
-
-  setDestacada(nuevaDestacada);
-
-  localStorage.setItem(
-    "nexora_publicaciones",
-    JSON.stringify(actualizadas)
-  );
-}
       {destacada && (
         <div className="pensamiento-info">
           <div className="autor">
@@ -135,23 +149,25 @@ function reaccionar(simbolo) {
 
           <p>{destacada.texto}</p>
 
+          <div className="reacciones">
+            {Object.entries(
+              destacada.reacciones || {}
+            ).map(([simbolo, cantidad]) => (
+              <button
+                key={simbolo}
+                onClick={() => reaccionar(simbolo)}
+              >
+                {simbolo} {cantidad}
+              </button>
+            ))}
+          </div>
+
           <small>
-        <div className="reacciones">
-  {Object.entries(
-    destacada.reacciones || {}
-  ).map(([simbolo, cantidad]) => (
-    <button
-      key={simbolo}
-      onClick={() => reaccionar(simbolo)}
-    >
-      {simbolo} {cantidad}
-    </button>
-  ))}
-</div>
             {Object.values(
               destacada.reacciones || {}
             ).reduce(
-              (total, cantidad) => total + cantidad,
+              (total, cantidad) =>
+                total + cantidad,
               0
             )}{" "}
             conexiones
@@ -242,27 +258,31 @@ function reaccionar(simbolo) {
           font-size: 20px;
           line-height: 1.4;
         }
-.reacciones {
-  margin-top: 18px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
 
-.reacciones button {
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  border: 1px solid #333;
-  border-radius: 20px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 16px;
-}
+        .reacciones {
+          margin-top: 18px;
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+        }
 
-.reacciones button:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
+        .reacciones button {
+          background: rgba(255, 255, 255, 0.05);
+          color: white;
+          border: 1px solid #333;
+          border-radius: 20px;
+          padding: 8px 12px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+
+        .reacciones button:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+
         .pensamiento-info small {
+          display: block;
+          margin-top: 12px;
           opacity: 0.5;
         }
 
