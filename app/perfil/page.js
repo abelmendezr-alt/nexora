@@ -10,38 +10,33 @@ export default function Perfil() {
   const [siguiendo, setSiguiendo] = useState([]);
 
   useEffect(() => {
-    const nombreGuardado =
+    setNombre(
       localStorage.getItem("nexora_nombre") ||
-      "Usuario";
+        "Usuario"
+    );
 
-    const publicacionesGuardadas =
+    setPublicaciones(
       JSON.parse(
         localStorage.getItem(
           "nexora_publicaciones"
         ) || "[]"
-      );
+      )
+    );
 
-    const nexosGuardados =
+    setNexos(
       JSON.parse(
         localStorage.getItem(
           "nexora_nexos"
         ) || "[]"
-      );
+      )
+    );
 
-    const siguiendoGuardado =
+    setSiguiendo(
       JSON.parse(
         localStorage.getItem(
           "nexora_siguiendo"
         ) || "[]"
-      );
-
-    setNombre(nombreGuardado);
-    setPublicaciones(
-      publicacionesGuardadas
-    );
-    setNexos(nexosGuardados);
-    setSiguiendo(
-      siguiendoGuardado
+      )
     );
   }, []);
 
@@ -66,9 +61,7 @@ export default function Perfil() {
           ◉
         </div>
 
-        <h1>
-          {nombre}
-        </h1>
+        <h1>{nombre}</h1>
 
         <p>
           Conectado al nexo.
@@ -82,30 +75,105 @@ export default function Perfil() {
           <strong>
             {misPublicaciones.length}
           </strong>
-
-          <span>
-            Pensamientos
-          </span>
+          <span>Pensamientos</span>
         </div>
 
         <div>
           <strong>
             {nexos.length}
           </strong>
-
-          <span>
-            Nexos
-          </span>
+          <span>Nexos</span>
         </div>
 
         <div>
           <strong>
             {siguiendo.length}
           </strong>
+          <span>Siguiendo</span>
+        </div>
 
-          <span>
-            Siguiendo
-          </span>
+      </section>
+
+      <section className="conexion">
+
+        <div className="titulo-seccion">
+          <span>TU NEXO</span>
+          <small>
+            {nexos.length} conexiones
+          </small>
+        </div>
+
+        <div className="constelacion">
+
+          <div className="linea linea1" />
+          <div className="linea linea2" />
+          <div className="linea linea3" />
+          <div className="linea linea4" />
+
+          <div className="luz-central">
+            <span>◉</span>
+            <small>{nombre}</small>
+          </div>
+
+          {nexos.length === 0 ? (
+            <div className="sin-nexos">
+              Tu constelación todavía
+              está esperando.
+            </div>
+          ) : (
+            nexos.map((nexo, index) => {
+
+              const posiciones = [
+                {
+                  top: "18%",
+                  left: "18%",
+                },
+                {
+                  top: "20%",
+                  right: "16%",
+                },
+                {
+                  bottom: "20%",
+                  left: "20%",
+                },
+                {
+                  bottom: "18%",
+                  right: "18%",
+                },
+                {
+                  top: "48%",
+                  left: "8%",
+                },
+                {
+                  top: "48%",
+                  right: "8%",
+                },
+              ];
+
+              const posicion =
+                posiciones[
+                  index %
+                    posiciones.length
+                ];
+
+              return (
+                <div
+                  key={`${nexo.persona}-${index}`}
+                  className="nexo-luz"
+                  style={posicion}
+                >
+                  <div className="luz">
+                    ◉
+                  </div>
+
+                  <span>
+                    {nexo.persona}
+                  </span>
+                </div>
+              );
+            })
+          )}
+
         </div>
 
       </section>
@@ -139,12 +207,9 @@ export default function Perfil() {
 
                 return (
                   <article
-                    key={
-                      publicacion.id
-                    }
+                    key={publicacion.id}
                     className="tarjeta"
                   >
-
                     <p>
                       {publicacion.texto}
                     </p>
@@ -152,53 +217,9 @@ export default function Perfil() {
                     <small>
                       {total} conexiones
                     </small>
-
                   </article>
                 );
               }
-            )}
-
-          </div>
-        )}
-
-      </section>
-
-      <section className="conexion">
-
-        <h2>
-          Tu Nexo
-        </h2>
-
-        {nexos.length === 0 ? (
-          <p className="suave">
-            Tus conexiones aparecerán aquí.
-          </p>
-        ) : (
-          <div className="lista">
-
-            {nexos.map(
-              (nexo, index) => (
-                <div
-                  key={`${nexo.persona}-${index}`}
-                  className="persona"
-                >
-
-                  <div className="mini-avatar">
-                    ◉
-                  </div>
-
-                  <div>
-                    <strong>
-                      {nexo.persona}
-                    </strong>
-
-                    <small>
-                      {nexo.pensamiento}
-                    </small>
-                  </div>
-
-                </div>
-              )
             )}
 
           </div>
@@ -271,17 +292,20 @@ export default function Perfil() {
           text-align: center;
 
           padding:
-            45px 20px 25px;
+            40px 20px 20px;
         }
 
         .avatar {
           width: 100px;
           height: 100px;
 
+          margin: auto;
+
           border-radius: 50%;
 
           border:
-            1px solid rgba(
+            1px solid
+            rgba(
               255,
               255,
               255,
@@ -294,8 +318,6 @@ export default function Perfil() {
 
           justify-content: center;
 
-          margin: auto;
-
           font-size: 35px;
 
           box-shadow:
@@ -304,7 +326,7 @@ export default function Perfil() {
               255,
               255,
               255,
-              0.12
+              0.15
             );
         }
 
@@ -325,7 +347,7 @@ export default function Perfil() {
             min(90%, 600px);
 
           margin:
-            10px auto 40px;
+            10px auto 35px;
 
           display: grid;
 
@@ -342,7 +364,8 @@ export default function Perfil() {
         }
 
         .estadisticas div {
-          padding: 18px 8px;
+          padding:
+            16px 8px;
 
           text-align: center;
 
@@ -367,21 +390,316 @@ export default function Perfil() {
 
           margin-top: 5px;
 
-          font-size: 11px;
+          font-size: 10px;
 
           opacity: 0.45;
         }
 
-        .contenido,
-        .conexion {
+        .conexion,
+        .contenido {
           width:
-            min(90%, 600px);
+            min(92%, 600px);
 
-          margin: 0 auto 35px;
+          margin:
+            0 auto 35px;
         }
 
-        h2 {
+        .titulo-seccion {
+          display: flex;
+
+          justify-content:
+            space-between;
+
+          align-items: center;
+
+          margin-bottom: 12px;
+
+          letter-spacing: 3px;
+
+          font-size: 13px;
+
+          opacity: 0.7;
+        }
+
+        .titulo-seccion small {
+          letter-spacing: 0;
+
+          opacity: 0.45;
+        }
+
+        .constelacion {
+          height: 380px;
+
+          position: relative;
+
+          overflow: hidden;
+
+          border:
+            1px solid #222;
+
+          border-radius:
+            25px;
+
+          background:
+            radial-gradient(
+              circle at center,
+              rgba(
+                255,
+                255,
+                255,
+                0.04
+              ),
+              transparent 55%
+            );
+        }
+
+        .constelacion::before,
+        .constelacion::after {
+          content: "";
+
+          position: absolute;
+
+          width: 3px;
+          height: 3px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          box-shadow:
+            80px 40px white,
+            180px 90px white,
+            300px 45px white,
+            420px 120px white,
+            120px 300px white,
+            350px 270px white;
+
+          opacity: 0.35;
+        }
+
+        .constelacion::before {
+          top: 20px;
+          left: 10px;
+        }
+
+        .constelacion::after {
+          bottom: 20px;
+          right: 10px;
+          opacity: 0.2;
+        }
+
+        .luz-central {
+          position: absolute;
+
+          top: 50%;
+          left: 50%;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          width: 70px;
+          height: 70px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 25px;
+
+          box-shadow:
+            0 0 20px white,
+            0 0 60px
+            rgba(
+              255,
+              255,
+              255,
+              0.5
+            ),
+            0 0 110px
+            rgba(
+              255,
+              255,
+              255,
+              0.2
+            );
+
+          z-index: 5;
+
+          animation:
+            respirar
+            4s
+            ease-in-out
+            infinite;
+        }
+
+        .luz-central small {
+          position: absolute;
+
+          top: 82px;
+
+          color: white;
+
+          font-size: 11px;
+
+          white-space: nowrap;
+
+          opacity: 0.6;
+        }
+
+        .nexo-luz {
+          position: absolute;
+
+          display: flex;
+
+          flex-direction: column;
+
+          align-items: center;
+
+          gap: 7px;
+
+          z-index: 4;
+
+          animation:
+            aparecer
+            0.8s
+            ease;
+        }
+
+        .nexo-luz .luz {
+          width: 32px;
+          height: 32px;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 13px;
+
+          box-shadow:
+            0 0 15px white,
+            0 0 35px
+            rgba(
+              150,
+              180,
+              255,
+              0.45
+            );
+
+          animation:
+            respirar2
+            3s
+            ease-in-out
+            infinite;
+        }
+
+        .nexo-luz span {
+          font-size: 10px;
+
+          opacity: 0.65;
+
+          max-width: 80px;
+
+          overflow: hidden;
+
+          text-overflow: ellipsis;
+
+          white-space: nowrap;
+        }
+
+        .linea {
+          position: absolute;
+
+          height: 1px;
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(
+                255,
+                255,
+                255,
+                0.3
+              ),
+              transparent
+            );
+
+          width: 35%;
+
+          left: 32.5%;
+
+          top: 50%;
+
+          transform-origin:
+            center;
+
+          opacity: 0.5;
+        }
+
+        .linea1 {
+          transform:
+            rotate(25deg);
+        }
+
+        .linea2 {
+          transform:
+            rotate(-25deg);
+        }
+
+        .linea3 {
+          transform:
+            rotate(155deg);
+        }
+
+        .linea4 {
+          transform:
+            rotate(-155deg);
+        }
+
+        .sin-nexos {
+          position: absolute;
+
+          top: 50%;
+          left: 50%;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
+
+          width: 75%;
+
+          text-align: center;
+
+          opacity: 0.35;
+
           font-size: 14px;
+
+          line-height: 1.5;
+        }
+
+        .contenido h2 {
+          font-size: 13px;
 
           font-weight: 400;
 
@@ -389,7 +707,7 @@ export default function Perfil() {
 
           opacity: 0.65;
 
-          margin-bottom: 18px;
+          margin-bottom: 15px;
         }
 
         .pensamientos {
@@ -442,72 +760,6 @@ export default function Perfil() {
           text-align: center;
 
           opacity: 0.45;
-
-          line-height: 1.5;
-        }
-
-        .suave {
-          opacity: 0.4;
-        }
-
-        .lista {
-          display: flex;
-
-          flex-direction: column;
-
-          gap: 10px;
-        }
-
-        .persona {
-          display: flex;
-
-          align-items: center;
-
-          gap: 14px;
-
-          padding: 14px;
-
-          border:
-            1px solid #222;
-
-          border-radius:
-            16px;
-        }
-
-        .mini-avatar {
-          width: 42px;
-          height: 42px;
-
-          border-radius: 50%;
-
-          border:
-            1px solid #444;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-        }
-
-        .persona strong {
-          display: block;
-        }
-
-        .persona small {
-          display: block;
-
-          margin-top: 4px;
-
-          opacity: 0.4;
-
-          max-width: 240px;
-
-          overflow: hidden;
-
-          text-overflow: ellipsis;
-
-          white-space: nowrap;
         }
 
         nav {
@@ -525,7 +777,7 @@ export default function Perfil() {
               0,
               0,
               0,
-              0.88
+              0.9
             );
 
           border-top:
@@ -557,6 +809,74 @@ export default function Perfil() {
 
           text-shadow:
             0 0 12px white;
+        }
+
+        @keyframes respirar {
+
+          0% {
+            transform:
+              translate(
+                -50%,
+                -50%
+              )
+              scale(1);
+          }
+
+          50% {
+            transform:
+              translate(
+                -50%,
+                -50%
+              )
+              scale(1.1);
+          }
+
+          100% {
+            transform:
+              translate(
+                -50%,
+                -50%
+              )
+              scale(1);
+          }
+
+        }
+
+        @keyframes respirar2 {
+
+          0% {
+            transform:
+              scale(1);
+          }
+
+          50% {
+            transform:
+              scale(1.15);
+          }
+
+          100% {
+            transform:
+              scale(1);
+          }
+
+        }
+
+        @keyframes aparecer {
+
+          from {
+            opacity: 0;
+
+            transform:
+              translateY(10px);
+          }
+
+          to {
+            opacity: 1;
+
+            transform:
+              translateY(0);
+          }
+
         }
 
       `}</style>
