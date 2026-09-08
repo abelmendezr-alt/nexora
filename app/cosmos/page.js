@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { nexoraData } from "../../data";
 
-const nodos = [
-  { id: 1, x: 50, y: 25 },
-  { id: 2, x: 30, y: 42 },
-  { id: 3, x: 70, y: 42 },
-  { id: 4, x: 40, y: 62 },
-  { id: 5, x: 60, y: 62 },
-  { id: 6, x: 50, y: 80 },
+const posiciones = [
+  { x: 30, y: 35 },
+  { x: 70, y: 45 },
+  { x: 50, y: 70 },
 ];
 
 export default function Cosmos() {
@@ -37,29 +35,64 @@ export default function Cosmos() {
           height: "65vh",
         }}
       >
-        <line x1="50" y1="25" x2="30" y2="42" stroke="#444" />
-        <line x1="50" y1="25" x2="70" y2="42" stroke="#444" />
-        <line x1="30" y1="42" x2="40" y2="62" stroke="#444" />
-        <line x1="70" y1="42" x2="60" y2="62" stroke="#444" />
-        <line x1="40" y1="62" x2="60" y2="62" stroke="#444" />
-        <line x1="40" y1="62" x2="50" y2="80" stroke="#444" />
-        <line x1="60" y1="62" x2="50" y2="80" stroke="#444" />
+        <line
+          x1="30"
+          y1="35"
+          x2="70"
+          y2="45"
+          stroke="#444"
+        />
 
-        {nodos.map((nodo) => (
-          <circle
-            key={nodo.id}
-            cx={nodo.x}
-            cy={nodo.y}
-            r="3"
-            fill={seleccionado === nodo.id ? "white" : "#aaa"}
-            onClick={() => setSeleccionado(nodo.id)}
-            style={{ cursor: "pointer" }}
-          />
-        ))}
+        <line
+          x1="70"
+          y1="45"
+          x2="50"
+          y2="70"
+          stroke="#444"
+        />
+
+        <line
+          x1="50"
+          y1="70"
+          x2="30"
+          y2="35"
+          stroke="#444"
+        />
+
+        {nexoraData.publicaciones.map((publicacion, index) => {
+          const posicion = posiciones[index];
+
+          return (
+            <circle
+              key={publicacion.id}
+              cx={posicion.x}
+              cy={posicion.y}
+              r="4"
+              fill={
+                seleccionado === publicacion.id
+                  ? "white"
+                  : "#aaa"
+              }
+              onClick={() =>
+                setSeleccionado(publicacion.id)
+              }
+              style={{ cursor: "pointer" }}
+            />
+          );
+        })}
       </svg>
 
       {seleccionado && (
-        <p>Has encontrado el nexo {seleccionado}.</p>
+        <section>
+          <p>
+            {
+              nexoraData.publicaciones.find(
+                (publicacion) =>
+                  publicacion.id === seleccionado
+              )?.texto
+            }
+          </p>
+        </section>
       )}
     </main>
   );
