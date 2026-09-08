@@ -7,30 +7,31 @@ export default function Nexo() {
   const [nombre, setNombre] = useState("Usuario");
   const [publicaciones, setPublicaciones] = useState([]);
   const [nexos, setNexos] = useState([]);
+  const [nodoActivo, setNodoActivo] = useState(null);
+  const [acercamiento, setAcercamiento] = useState(false);
 
   useEffect(() => {
-    const miNombre =
-      localStorage.getItem("nexora_nombre") || "Usuario";
-
-    setNombre(miNombre);
-
-    const guardadas = JSON.parse(
-      localStorage.getItem("nexora_publicaciones") || "[]"
+    setNombre(
+      localStorage.getItem("nexora_nombre") || "Usuario"
     );
 
-    const conexiones = JSON.parse(
-      localStorage.getItem("nexora_nexos") || "[]"
+    setPublicaciones(
+      JSON.parse(
+        localStorage.getItem(
+          "nexora_publicaciones"
+        ) || "[]"
+      )
     );
 
-    setPublicaciones(guardadas);
-    setNexos(conexiones);
+    setNexos(
+      JSON.parse(
+        localStorage.getItem(
+          "nexora_nexos"
+        ) || "[]"
+      )
+    );
   }, []);
 
-  /*
-    Posiciones de la galaxia.
-    Después podremos hacer que estas posiciones
-    sean dinámicas según las conexiones reales.
-  */
   const posiciones = [
     { x: 14, y: 20 },
     { x: 84, y: 18 },
@@ -44,11 +45,6 @@ export default function Nexo() {
     { x: 65, y: 92 },
   ];
 
-  /*
-    Si todavía no existen nexos reales,
-    mostramos pequeñas luces para que la galaxia
-    no se vea vacía.
-  */
   const conexionesVisibles =
     nexos.length > 0
       ? nexos
@@ -59,236 +55,374 @@ export default function Nexo() {
           { persona: "Universo" },
         ];
 
-  /*
-    Calculamos la fuerza visual de cada nodo
-    dependiendo de sus reacciones.
-  */
-  function fuerzaNodo(nexo, index) {
-    if (!nexos.length) {
-      return {
-        tamano: 30,
-        intensidad: 0.45,
-        color: "white",
-      };
+  function obtenerReacciones(nexo) {
+    if (!nexo) return 0;
+
+    if (typeof nexo.reacciones === "number") {
+      return nexo.reacciones;
     }
 
-    const conexiones = Number(
-      nexo.conexiones ||
-        nexo.reacciones ||
-        nexo.total ||
+    if (typeof nexo.conexiones === "number") {
+      return nexo.conexiones;
+    }
+
+    if (typeof nexo.total === "number") {
+      return nexo.total;
+    }
+
+    if (
+      nexo.reacciones &&
+      typeof nexo.reacciones === "object"
+    ) {
+      return Object.values(
+        nexo.reacciones
+      ).reduce(
+        (total, cantidad) =>
+          total + Number(cantidad || 0),
         0
-    );
+      );
+    }
 
-    const tamano = Math.min(
-      28 + conexiones * 5,
-      70
-    );
+    return 0;
+  }
 
-    if (conexiones >= 8) {
+  function obtenerEstilo(nexo) {
+    const reacciones =
+      obtenerReacciones(nexo);
+
+    if (reacciones >= 8) {
       return {
-        tamano,
-        intensidad: 1,
+        tamano: 62,
         color: "#ffffff",
+        intensidad: 1,
       };
     }
 
-    if (conexiones >= 4) {
+    if (reacciones >= 5) {
       return {
-        tamano,
+        tamano: 52,
+        color: "#b9c8ff",
+        intensidad: 0.95,
+      };
+    }
+
+    if (reacciones >= 3) {
+      return {
+        tamano: 43,
+        color: "#d7d7ff",
         intensidad: 0.85,
-        color: "#b8c8ff",
       };
     }
 
-    if (conexiones >= 2) {
+    if (reacciones >= 1) {
       return {
-        tamano,
-        intensidad: 0.7,
-        color: "#d8d8ff",
+        tamano: 36,
+        color: "#eeeeee",
+        intensidad: 0.75,
       };
     }
 
     return {
-      tamano,
+      tamano: 30,
+      color: "#ffffff",
       intensidad: 0.55,
-      color: "white",
     };
+  }
+
+  function seleccionarNodo(nexo, index) {
+    setNodoActivo({
+      ...nexo,
+      index,
+    });
+
+    setAcercamiento(true);
+  }
+
+  function volverOrigen() {
+    setAcercamiento(false);
+
+    setTimeout(() => {
+      setNodoActivo(null);
+    }, 350);
   }
 
   return (
     <main className="nexo">
 
-      {/* CABECERA */}
-
       <header className="header">
-        <div className="marca">NEXORA</div>
+        <div className="marca">
+          NEXORA
+        </div>
       </header>
 
-
-      {/* GALAXIA */}
 
       <section className="universo">
 
         <div className="titulo">
           <span>EL NEXO</span>
-          <small>{nombre}</small>
+
+          <small>
+            {nombre}
+          </small>
         </div>
 
 
-        <div className="cosmo">
+        <div
+          className={
+            acercamiento
+              ? "cosmo acercado"
+              : "cosmo"
+          }
+        >
 
-          {/* estrellas */}
+          {/* ESTRELLAS */}
 
-          {Array.from({ length: 45 }).map((_, index) => (
+          {Array.from({
+            length: 55,
+          }).map((_, index) => (
             <div
-              key={`estrella-${index}`}
+              key={index}
               className="estrella"
               style={{
-                left: `${(index * 37) % 100}%`,
-                top: `${(index * 61) % 100}%`,
-                animationDelay: `${(index % 8) * 0.4}s`,
+                left:
+                  `${(index * 37) % 100}%`,
+                top:
+                  `${(index * 61) % 100}%`,
+                animationDelay:
+                  `${(index % 8) * .4}s`,
               }}
             />
           ))}
 
 
-          {/* órbitas */}
+          {/* ÓRBITAS */}
 
           <div className="orbita orbita-1" />
           <div className="orbita orbita-2" />
           <div className="orbita orbita-3" />
 
 
-          {/* líneas de conexión */}
+          {/* LÍNEAS */}
 
           <div className="lineas">
-            {conexionesVisibles.map((nexo, index) => {
-              const posicion =
-                posiciones[index % posiciones.length];
 
-              return (
-                <svg
-                  key={`linea-${index}`}
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-                  <line
-                    x1="50"
-                    y1="50"
-                    x2={posicion.x}
-                    y2={posicion.y}
-                    style={{
-                      animationDelay: `${index * 0.5}s`,
-                    }}
-                  />
-                </svg>
-              );
-            })}
+            {conexionesVisibles.map(
+              (nexo, index) => {
+
+                const posicion =
+                  posiciones[
+                    index %
+                    posiciones.length
+                  ];
+
+                return (
+                  <svg
+                    key={index}
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <line
+                      x1="50"
+                      y1="50"
+                      x2={posicion.x}
+                      y2={posicion.y}
+                      style={{
+                        animationDelay:
+                          `${index * .5}s`,
+                      }}
+                    />
+                  </svg>
+                );
+              }
+            )}
+
           </div>
 
 
           {/* NODOS */}
 
-          {conexionesVisibles.map((nexo, index) => {
-            const posicion =
-              posiciones[index % posiciones.length];
+          {conexionesVisibles.map(
+            (nexo, index) => {
 
-            const fuerza =
-              fuerzaNodo(nexo, index);
+              const posicion =
+                posiciones[
+                  index %
+                  posiciones.length
+                ];
 
-            return (
-              <div
-                key={`${nexo.persona}-${index}`}
-                className="nodo"
-                style={{
-                  left: `${posicion.x}%`,
-                  top: `${posicion.y}%`,
-                  "--delay": `${index * 0.5}s`,
-                }}
-              >
+              const estilo =
+                obtenerEstilo(nexo);
 
-                <div
-                  className="nodo-luz"
+              const activo =
+                nodoActivo?.index === index;
+
+              return (
+                <button
+                  key={
+                    `${nexo.persona}-${index}`
+                  }
+                  className={
+                    activo
+                      ? "nodo nodo-activo"
+                      : "nodo"
+                  }
                   style={{
-                    width: `${fuerza.tamano}px`,
-                    height: `${fuerza.tamano}px`,
-                    color:
-                      fuerza.color === "white"
-                        ? "black"
-                        : "#050505",
-                    background:
-                      fuerza.color,
-                    opacity:
-                      fuerza.intensidad,
-                    boxShadow: `
-                      0 0 12px ${fuerza.color},
-                      0 0 30px ${fuerza.color},
-                      0 0 65px ${fuerza.color}
-                    `,
+                    left:
+                      `${posicion.x}%`,
+                    top:
+                      `${posicion.y}%`,
+                    "--delay":
+                      `${index * .5}s`,
                   }}
+                  onClick={() =>
+                    seleccionarNodo(
+                      nexo,
+                      index
+                    )
+                  }
                 >
-                  ◉
-                </div>
 
-                {nexos.length > 0 && (
-                  <span>{nexo.persona}</span>
-                )}
+                  <div
+                    className="nodo-luz"
+                    style={{
+                      width:
+                        `${estilo.tamano}px`,
+                      height:
+                        `${estilo.tamano}px`,
+                      background:
+                        estilo.color,
+                      opacity:
+                        estilo.intensidad,
+                      boxShadow: `
+                        0 0 12px ${estilo.color},
+                        0 0 30px ${estilo.color},
+                        0 0 65px ${estilo.color}
+                      `,
+                    }}
+                  >
+                    ◉
+                  </div>
 
-              </div>
-            );
-          })}
+                  {nexos.length > 0 && (
+                    <span>
+                      {nexo.persona}
+                    </span>
+                  )}
+
+                </button>
+              );
+            }
+          )}
 
 
           {/* ORIGEN */}
 
-          <Link
-            href="/nexo"
+          <button
             className="origen"
-            aria-label="Origen"
+            onClick={volverOrigen}
+            aria-label="Volver al origen"
           >
 
             <div className="origen-anillo">
+
               <div className="origen-luz">
                 ◎
               </div>
+
             </div>
 
-            <span>ORIGEN</span>
+            <span>
+              ORIGEN
+            </span>
 
-          </Link>
+          </button>
 
         </div>
+
+
+        {/* INFORMACIÓN DEL NODO */}
+
+        {nodoActivo && (
+          <section className="panel-nodo">
+
+            <div className="panel-indicador">
+              NEXO ENCONTRADO
+            </div>
+
+            <h2>
+              {nodoActivo.persona}
+            </h2>
+
+            <p>
+              Este punto forma parte
+              de tu galaxia.
+            </p>
+
+            <div className="datos-nodo">
+
+              <div>
+                <strong>
+                  {obtenerReacciones(
+                    nodoActivo
+                  )}
+                </strong>
+
+                <span>
+                  conexiones
+                </span>
+              </div>
+
+              <div>
+                <strong>
+                  ∞
+                </strong>
+
+                <span>
+                  vínculo
+                </span>
+              </div>
+
+            </div>
+
+            <button
+              className="cerrar-nodo"
+              onClick={volverOrigen}
+            >
+              VOLVER AL ORIGEN
+            </button>
+
+          </section>
+        )}
+
       </section>
 
 
-      {/* BOTONES FLOTANTES */}
+      {/* ACCIONES */}
 
       <div className="acciones">
 
         <Link
           href="/crear"
-          className="accion accion-crear"
-          aria-label="Crear"
+          className="accion crear"
         >
-          <span>＋</span>
+          ＋
+          <span>CREAR</span>
         </Link>
-
 
         <Link
           href="/explorar"
-          className="accion accion-explorar"
-          aria-label="Explorar"
+          className="accion explorar"
         >
-          <span>✦</span>
+          ✦
+          <span>EXPLORAR</span>
         </Link>
-
 
         <Link
           href="/perfil"
-          className="accion accion-perfil"
-          aria-label="Perfil"
+          className="accion perfil"
         >
-          <span>◉</span>
+          ◉
+          <span>PERFIL</span>
         </Link>
 
       </div>
@@ -299,11 +433,17 @@ export default function Nexo() {
       <section className="flujo">
 
         <div className="flujo-titulo">
-          <span>FLUJO DEL NEXO</span>
+
+          <span>
+            FLUJO DEL NEXO
+          </span>
 
           <small>
-            {publicaciones.length} pensamientos
+            {publicaciones.length}
+            {" "}
+            pensamientos
           </small>
+
         </div>
 
 
@@ -333,42 +473,53 @@ export default function Nexo() {
 
             {publicaciones
               .slice(0, 5)
-              .map((publicacion) => (
+              .map(
+                (publicacion) => (
 
-                <article
-                  key={publicacion.id}
-                  className="pensamiento"
-                >
+                  <article
+                    key={
+                      publicacion.id
+                    }
+                    className="pensamiento"
+                  >
 
-                  <div className="autor">
-                    <span>◉</span>
-                    {publicacion.nombre}
-                  </div>
+                    <div className="autor">
+                      ◉{" "}
+                      {publicacion.nombre}
+                    </div>
 
-                  <p>
-                    {publicacion.texto}
-                  </p>
+                    <p>
+                      {publicacion.texto}
+                    </p>
 
-                  <div className="reacciones">
+                    <div className="reacciones">
 
-                    {Object.entries(
-                      publicacion.reacciones || {}
-                    ).map(
-                      ([simbolo, cantidad]) => (
-                        <span key={simbolo}>
-                          {simbolo} {cantidad}
-                        </span>
-                      )
-                    )}
+                      {Object.entries(
+                        publicacion.reacciones ||
+                          {}
+                      ).map(
+                        (
+                          [
+                            simbolo,
+                            cantidad,
+                          ]
+                        ) => (
+                          <span
+                            key={simbolo}
+                          >
+                            {simbolo}{" "}
+                            {cantidad}
+                          </span>
+                        )
+                      )}
 
-                  </div>
+                    </div>
 
-                </article>
-
-              ))}
+                  </article>
+                )
+              )}
 
           </div>
-
         )}
 
       </section>
@@ -401,20 +552,18 @@ export default function Nexo() {
         }
 
 
-        /* HEADER */
-
         .header {
           height: 62px;
 
-          padding:
-            0 22px;
+          padding: 0 22px;
 
           display: flex;
 
           align-items: center;
 
           border-bottom:
-            1px solid rgba(
+            1px solid
+            rgba(
               255,
               255,
               255,
@@ -435,16 +584,13 @@ export default function Nexo() {
         }
 
 
-        /* UNIVERSO */
-
         .universo {
-          position: relative;
-
           width:
             min(100%, 760px);
 
-          margin:
-            auto;
+          margin: auto;
+
+          position: relative;
         }
 
 
@@ -469,8 +615,6 @@ export default function Nexo() {
         }
 
 
-        /* COSMO */
-
         .cosmo {
           position: relative;
 
@@ -485,21 +629,37 @@ export default function Nexo() {
 
           border-radius: 50%;
 
-          overflow: hidden;
-
           background:
             radial-gradient(
               circle at center,
-              rgba(255,255,255,.055),
+              rgba(
+                255,
+                255,
+                255,
+                .055
+              ),
               transparent 58%
             );
 
-          touch-action:
-            pan-x pan-y;
+          transition:
+            transform .6s
+            cubic-bezier(
+              .2,
+              .8,
+              .2,
+              1
+            );
+
+          transform-origin:
+            center center;
         }
 
 
-        /* ESTRELLAS */
+        .cosmo.acercado {
+          transform:
+            scale(1.16);
+        }
+
 
         .estrella {
           position: absolute;
@@ -518,26 +678,24 @@ export default function Nexo() {
             4s
             ease-in-out
             infinite;
-
-          z-index: 0;
         }
 
         @keyframes estrellaRespira {
 
           0%,100% {
             opacity: .15;
-            transform: scale(1);
+            transform:
+              scale(1);
           }
 
           50% {
             opacity: .6;
-            transform: scale(1.8);
+            transform:
+              scale(1.8);
           }
 
         }
 
-
-        /* ÓRBITAS */
 
         .orbita {
           position: absolute;
@@ -591,14 +749,6 @@ export default function Nexo() {
           width: 94%;
           height: 94%;
 
-          border-color:
-            rgba(
-              255,
-              255,
-              255,
-              .035
-            );
-
           animation:
             girar
             48s
@@ -606,8 +756,6 @@ export default function Nexo() {
             infinite;
         }
 
-
-        /* LÍNEAS */
 
         .lineas {
           position: absolute;
@@ -656,13 +804,11 @@ export default function Nexo() {
           }
 
           50% {
-            opacity: .75;
+            opacity: .8;
           }
 
         }
 
-
-        /* NODOS */
 
         .nodo {
           position: absolute;
@@ -675,6 +821,15 @@ export default function Nexo() {
 
           z-index: 5;
 
+          border: none;
+
+          background:
+            transparent;
+
+          color: white;
+
+          padding: 8px;
+
           display: flex;
 
           flex-direction: column;
@@ -682,6 +837,8 @@ export default function Nexo() {
           align-items: center;
 
           gap: 6px;
+
+          cursor: pointer;
 
           animation:
             flotar
@@ -691,6 +848,29 @@ export default function Nexo() {
 
           animation-delay:
             var(--delay);
+
+          transition:
+            transform .3s ease;
+        }
+
+        .nodo:hover {
+          transform:
+            translate(
+              -50%,
+              -50%
+            )
+            scale(1.15);
+        }
+
+        .nodo-activo {
+          z-index: 12;
+
+          transform:
+            translate(
+              -50%,
+              -50%
+            )
+            scale(1.25);
         }
 
         .nodo-luz {
@@ -705,15 +885,13 @@ export default function Nexo() {
           font-size: 11px;
 
           transition:
-            width .5s ease,
-            height .5s ease,
-            box-shadow .5s ease;
+            all .5s ease;
         }
 
         .nodo span {
           font-size: 9px;
 
-          opacity: .45;
+          opacity: .5;
 
           white-space: nowrap;
         }
@@ -733,7 +911,14 @@ export default function Nexo() {
               -50%
             );
 
-          z-index: 10;
+          z-index: 15;
+
+          border: none;
+
+          background:
+            transparent;
+
+          color: white;
 
           display: flex;
 
@@ -741,9 +926,7 @@ export default function Nexo() {
 
           align-items: center;
 
-          text-decoration: none;
-
-          color: white;
+          cursor: pointer;
         }
 
         .origen-anillo {
@@ -774,7 +957,8 @@ export default function Nexo() {
 
         .origen:hover
         .origen-anillo {
-          transform: scale(1.08);
+          transform:
+            scale(1.08);
 
           border-color:
             rgba(
@@ -811,13 +995,6 @@ export default function Nexo() {
               255,
               255,
               .55
-            ),
-            0 0 110px
-            rgba(
-              255,
-              255,
-              255,
-              .18
             );
 
           animation:
@@ -840,33 +1017,183 @@ export default function Nexo() {
         @keyframes respirarOrigen {
 
           0%,100% {
-            transform: scale(1);
+            transform:
+              scale(1);
           }
 
           50% {
-            transform: scale(1.1);
+            transform:
+              scale(1.1);
           }
 
         }
 
 
-        /* BOTONES LATERALES */
+        /* PANEL */
+
+        .panel-nodo {
+          width:
+            min(86%, 450px);
+
+          margin:
+            -5px auto 35px;
+
+          padding:
+            25px;
+
+          box-sizing:
+            border-box;
+
+          text-align: center;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .14
+            );
+
+          border-radius: 22px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .035
+            );
+
+          backdrop-filter:
+            blur(12px);
+
+          animation:
+            panelEntrada
+            .45s ease;
+        }
+
+        .panel-indicador {
+          font-size: 8px;
+
+          letter-spacing: 4px;
+
+          opacity: .4;
+        }
+
+        .panel-nodo h2 {
+          margin:
+            12px 0 8px;
+
+          font-size: 24px;
+
+          font-weight: 300;
+
+          letter-spacing: 2px;
+        }
+
+        .panel-nodo p {
+          margin: 0;
+
+          font-size: 12px;
+
+          opacity: .4;
+        }
+
+        .datos-nodo {
+          display: flex;
+
+          justify-content:
+            center;
+
+          gap: 50px;
+
+          margin:
+            25px 0;
+        }
+
+        .datos-nodo div {
+          display: flex;
+
+          flex-direction:
+            column;
+        }
+
+        .datos-nodo strong {
+          font-size: 24px;
+
+          font-weight: 300;
+        }
+
+        .datos-nodo span {
+          margin-top: 5px;
+
+          font-size: 9px;
+
+          opacity: .4;
+
+          letter-spacing: 1px;
+        }
+
+        .cerrar-nodo {
+          padding:
+            11px 20px;
+
+          border:
+            1px solid #444;
+
+          border-radius: 25px;
+
+          background:
+            transparent;
+
+          color: white;
+
+          font-size: 9px;
+
+          letter-spacing: 2px;
+
+          cursor: pointer;
+        }
+
+        @keyframes panelEntrada {
+
+          from {
+            opacity: 0;
+
+            transform:
+              translateY(15px)
+              scale(.96);
+          }
+
+          to {
+            opacity: 1;
+
+            transform:
+              translateY(0)
+              scale(1);
+          }
+
+        }
+
+
+        /* ACCIONES */
 
         .acciones {
           position: fixed;
 
           inset: 0;
 
-          pointer-events: none;
-
           z-index: 30;
+
+          pointer-events: none;
         }
 
         .accion {
           position: absolute;
 
-          width: 48px;
-          height: 48px;
+          width: 46px;
+          height: 46px;
 
           border-radius: 50%;
 
@@ -884,7 +1211,7 @@ export default function Nexo() {
               5,
               5,
               8,
-              .75
+              .72
             );
 
           backdrop-filter:
@@ -900,45 +1227,69 @@ export default function Nexo() {
 
           justify-content: center;
 
-          font-size: 20px;
-
-          opacity: .65;
+          font-size: 19px;
 
           pointer-events: auto;
 
+          opacity: .65;
+
           transition:
-            transform .25s ease,
-            opacity .25s ease,
-            border-color .25s ease;
+            .25s ease;
         }
 
         .accion:hover {
           opacity: 1;
 
-          transform: scale(1.12);
-
-          border-color:
-            rgba(
-              255,
-              255,
-              255,
-              .6
-            );
+          transform:
+            scale(1.1);
         }
 
-        .accion-crear {
-          left: 18px;
+        .accion span {
+          position: absolute;
+
+          opacity: 0;
+
+          pointer-events: none;
+
+          white-space: nowrap;
+
+          font-size: 8px;
+
+          letter-spacing: 2px;
+
+          transition:
+            opacity .2s ease;
+        }
+
+        .accion:hover span {
+          opacity: .6;
+        }
+
+        .crear {
+          left: 17px;
           top: 90px;
         }
 
-        .accion-explorar {
-          right: 18px;
+        .crear span {
+          left: 55px;
+        }
+
+        .explorar {
+          right: 17px;
           top: 90px;
         }
 
-        .accion-perfil {
-          right: 18px;
-          bottom: 25px;
+        .explorar span {
+          right: 55px;
+        }
+
+        .perfil {
+          right: 17px;
+          bottom: 20px;
+        }
+
+        .perfil span {
+          right: 55px;
         }
 
 
@@ -949,7 +1300,7 @@ export default function Nexo() {
             min(92%, 600px);
 
           margin:
-            10px auto 0;
+            5px auto 0;
         }
 
         .flujo-titulo {
@@ -957,8 +1308,6 @@ export default function Nexo() {
 
           justify-content:
             space-between;
-
-          align-items: center;
 
           margin-bottom: 12px;
 
@@ -974,7 +1323,6 @@ export default function Nexo() {
 
           opacity: .6;
         }
-
 
         .vacio {
           padding:
@@ -1055,7 +1403,6 @@ export default function Nexo() {
           letter-spacing: 2px;
         }
 
-
         .lista {
           display: flex;
 
@@ -1087,10 +1434,6 @@ export default function Nexo() {
           opacity: .45;
         }
 
-        .autor span {
-          margin-right: 7px;
-        }
-
         .pensamiento p {
           margin:
             12px 0;
@@ -1110,8 +1453,6 @@ export default function Nexo() {
           opacity: .4;
         }
 
-
-        /* ANIMACIONES */
 
         @keyframes flotar {
 
@@ -1148,13 +1489,16 @@ export default function Nexo() {
         }
 
 
-        /* MÓVIL */
-
         @media (max-width: 600px) {
 
           .cosmo {
             width: 100vw;
             height: 100vw;
+          }
+
+          .cosmo.acercado {
+            transform:
+              scale(1.1);
           }
 
           .origen-anillo {
@@ -1168,22 +1512,22 @@ export default function Nexo() {
           }
 
           .accion {
-            width: 44px;
-            height: 44px;
+            width: 43px;
+            height: 43px;
           }
 
-          .accion-crear {
-            left: 12px;
-            top: 82px;
+          .crear {
+            left: 10px;
+            top: 78px;
           }
 
-          .accion-explorar {
-            right: 12px;
-            top: 82px;
+          .explorar {
+            right: 10px;
+            top: 78px;
           }
 
-          .accion-perfil {
-            right: 12px;
+          .perfil {
+            right: 10px;
             bottom: 18px;
           }
 
