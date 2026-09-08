@@ -35,20 +35,22 @@ export default function Nexo() {
 
           <br />
 
-          <button onClick={publicar}>
-            Publicar
-          </button>
-
-          <button onClick={() => setPublicando(false)}>
-            Cancelar
-          </button>
+          <button onClick={publicar}>Publicar</button>
+          <button onClick={() => setPublicando(false)}>Cancelar</button>
         </section>
       )}
 
       {publicacion && (
-        <section>
+        <article>
+          <small>NEXORA · ahora</small>
           <p>{publicacion}</p>
-        </section>
+
+          <div>
+            <button>♡</button>
+            <button>Comentar</button>
+            <button>Compartir</button>
+          </div>
+        </article>
       )}
 
       <nav>
