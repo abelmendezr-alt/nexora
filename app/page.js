@@ -77,7 +77,7 @@ EL NEXO
     </Link>
 
     <Link
-      href="/entrar"
+      href="/explorar"
       style={{
         textAlign: "center",
         padding: "16px",
@@ -124,7 +124,7 @@ EL NEXO
     </Link>
 
     <Link
-      href="/entrar"
+      href="/perfil"
       style={{ color: "#aaa", textDecoration: "none" }}
     >
       Perfil
