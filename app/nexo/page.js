@@ -5,6 +5,15 @@ import { useState } from "react";
 export default function Nexo() {
   const [publicando, setPublicando] = useState(false);
   const [texto, setTexto] = useState("");
+  const [publicacion, setPublicacion] = useState("");
+
+  function publicar() {
+    if (texto.trim() === "") return;
+
+    setPublicacion(texto);
+    setTexto("");
+    setPublicando(false);
+  }
 
   return (
     <main>
@@ -26,18 +35,19 @@ export default function Nexo() {
 
           <br />
 
-          <button
-            onClick={() => {
-              setPublicando(false);
-              setTexto("");
-            }}
-          >
+          <button onClick={publicar}>
             Publicar
           </button>
 
           <button onClick={() => setPublicando(false)}>
             Cancelar
           </button>
+        </section>
+      )}
+
+      {publicacion && (
+        <section>
+          <p>{publicacion}</p>
         </section>
       )}
 
