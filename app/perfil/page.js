@@ -9,11 +9,37 @@ export default function Perfil() {
   const [nexos, setNexos] = useState([]);
   const [siguiendo, setSiguiendo] = useState([]);
 
+  const [estado, setEstado] = useState(null);
+  const [mostrarEstado, setMostrarEstado] = useState(false);
+  const [creandoEstado, setCreandoEstado] = useState(false);
+
+  const [textoEstado, setTextoEstado] = useState("");
+  const [cancionEstado, setCancionEstado] = useState("");
+
   useEffect(() => {
-    setNombre(
+    cargarPerfil();
+  }, []);
+
+  useEffect(() => {
+    if (!estado) return;
+
+    const revisar = setInterval(() => {
+      if (Date.now() >= estado.expira) {
+        localStorage.removeItem("nexora_estado");
+        setEstado(null);
+        setMostrarEstado(false);
+      }
+    }, 30000);
+
+    return () => clearInterval(revisar);
+  }, [estado]);
+
+  function cargarPerfil() {
+    const miNombre =
       localStorage.getItem("nexora_nombre") ||
-        "Usuario"
-    );
+      "Usuario";
+
+    setNombre(miNombre);
 
     setPublicaciones(
       JSON.parse(
@@ -38,7 +64,24 @@ export default function Perfil() {
         ) || "[]"
       )
     );
-  }, []);
+
+    const estadoGuardado = JSON.parse(
+      localStorage.getItem(
+        "nexora_estado"
+      ) || "null"
+    );
+
+    if (
+      estadoGuardado &&
+      Date.now() < estadoGuardado.expira
+    ) {
+      setEstado(estadoGuardado);
+    } else {
+      localStorage.removeItem(
+        "nexora_estado"
+      );
+    }
+  }
 
   const misPublicaciones =
     publicaciones.filter(
@@ -61,6 +104,79 @@ export default function Perfil() {
     { x: 88, y: 70 },
   ];
 
+  function publicarEstado() {
+    if (!textoEstado.trim()) return;
+
+    const ahora = Date.now();
+
+    const nuevoEstado = {
+      id: ahora,
+      nombre,
+      texto: textoEstado.trim(),
+      cancion: cancionEstado.trim(),
+      creado: ahora,
+      expira:
+        ahora +
+        3 * 60 * 60 * 1000,
+    };
+
+    localStorage.setItem(
+      "nexora_estado",
+      JSON.stringify(nuevoEstado)
+    );
+
+    setEstado(nuevoEstado);
+
+    setTextoEstado("");
+    setCancionEstado("");
+    setCreandoEstado(false);
+    setMostrarEstado(true);
+  }
+
+  function eliminarEstado() {
+    localStorage.removeItem(
+      "nexora_estado"
+    );
+
+    setEstado(null);
+    setMostrarEstado(false);
+  }
+
+  function tiempoRestante() {
+    if (!estado) return "";
+
+    const diferencia =
+      estado.expira - Date.now();
+
+    if (diferencia <= 0) {
+      eliminarEstado();
+      return "";
+    }
+
+    const horas = Math.floor(
+      diferencia /
+        (1000 * 60 * 60)
+    );
+
+    const minutos = Math.floor(
+      (diferencia %
+        (1000 * 60 * 60)) /
+        (1000 * 60)
+    );
+
+    return `${horas}h ${minutos}m`;
+  }
+
+  function tocarCirculo() {
+    if (estado) {
+      setMostrarEstado(
+        !mostrarEstado
+      );
+    } else {
+      setCreandoEstado(true);
+    }
+  }
+
   return (
     <main className="perfil">
 
@@ -70,19 +186,139 @@ export default function Perfil() {
         </Link>
       </header>
 
+      {/* PERFIL */}
+
       <section className="cabecera">
 
-        <div className="avatar">
-          ◉
-        </div>
+        <button
+          className={
+            estado
+              ? "avatar avatar-estado"
+              : "avatar"
+          }
+          onClick={tocarCirculo}
+        >
+          <span>◉</span>
+        </button>
 
         <h1>{nombre}</h1>
 
-        <p>
-          Conectado al nexo.
-        </p>
+        {estado ? (
+          <p className="estado-hint">
+            Estado activo · toca la luz
+          </p>
+        ) : (
+          <p>
+            Conectado al nexo.
+          </p>
+        )}
 
       </section>
+
+      {/* ESTADO */}
+
+      {creandoEstado && (
+        <section className="crear-estado">
+
+          <div className="mini-luz">
+            ◎
+          </div>
+
+          <h2>
+            CREAR ESTADO
+          </h2>
+
+          <textarea
+            autoFocus
+            value={textoEstado}
+            onChange={(e) =>
+              setTextoEstado(
+                e.target.value
+              )
+            }
+            placeholder="¿Qué está pasando en ti?"
+          />
+
+          <input
+            value={cancionEstado}
+            onChange={(e) =>
+              setCancionEstado(
+                e.target.value
+              )
+            }
+            placeholder="♫ ¿Qué estás escuchando? (opcional)"
+          />
+
+          <div className="estado-botones">
+
+            <button
+              onClick={() =>
+                setCreandoEstado(false)
+              }
+            >
+              CANCELAR
+            </button>
+
+            <button
+              className="activar"
+              disabled={
+                !textoEstado.trim()
+              }
+              onClick={
+                publicarEstado
+              }
+            >
+              ACTIVAR
+            </button>
+
+          </div>
+
+          <small>
+            Tu estado permanecerá activo
+            durante 3 horas.
+          </small>
+
+        </section>
+      )}
+
+      {/* ESTADO ACTIVO */}
+
+      {estado &&
+        mostrarEstado && (
+          <section className="estado-visible">
+
+            <div className="estado-etiqueta">
+              ESTADO ACTIVO
+            </div>
+
+            <p className="estado-texto">
+              {estado.texto}
+            </p>
+
+            {estado.cancion && (
+              <div className="estado-cancion">
+                <span>♫</span>
+                {estado.cancion}
+              </div>
+            )}
+
+            <div className="estado-tiempo">
+              ⏳ {tiempoRestante()}
+            </div>
+
+            <button
+              className="eliminar-estado"
+              onClick={
+                eliminarEstado
+              }
+            >
+              ELIMINAR
+            </button>
+
+          </section>
+        )}
+
+      {/* ESTADÍSTICAS */}
 
       <section className="estadisticas">
 
@@ -90,82 +326,91 @@ export default function Perfil() {
           <strong>
             {misPublicaciones.length}
           </strong>
-          <span>Pensamientos</span>
+          <span>
+            Pensamientos
+          </span>
         </div>
 
         <div>
           <strong>
             {nexos.length}
           </strong>
-          <span>Nexos</span>
+          <span>
+            Nexos
+          </span>
         </div>
 
         <div>
           <strong>
             {siguiendo.length}
           </strong>
-          <span>Siguiendo</span>
+          <span>
+            Siguiendo
+          </span>
         </div>
 
       </section>
 
+      {/* TU NEXO */}
+
       <section className="conexion">
 
         <div className="titulo-seccion">
-          <span>TU NEXO</span>
+
+          <span>
+            TU NEXO
+          </span>
 
           <small>
             {nexos.length} conexiones
           </small>
+
         </div>
 
         <div className="constelacion">
 
-          {/* CONEXIONES VIVAS */}
+          {nexos.map(
+            (nexo, index) => {
 
-          {nexos.map((nexo, index) => {
+              const posicion =
+                posiciones[
+                  index %
+                    posiciones.length
+                ];
 
-            const posicion =
-              posiciones[
-                index %
-                  posiciones.length
-              ];
-
-            return (
-              <div
-                key={`conexion-${nexo.persona}-${index}`}
-                className="conexion-viva"
-                style={{
-                  "--x": `${posicion.x}%`,
-                  "--y": `${posicion.y}%`,
-                  "--delay": `${index * 0.7}s`,
-                }}
-              >
-
-                {/* Línea */}
-
-                <svg
-                  className="conexion-svg"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
+              return (
+                <div
+                  key={`conexion-${nexo.persona}-${index}`}
+                  className="conexion-viva"
+                  style={{
+                    "--x":
+                      `${posicion.x}%`,
+                    "--y":
+                      `${posicion.y}%`,
+                    "--delay":
+                      `${index * 0.7}s`,
+                  }}
                 >
-                  <line
-                    x1="50"
-                    y1="50"
-                    x2={posicion.x}
-                    y2={posicion.y}
-                  />
-                </svg>
 
-                {/* Pulso */}
+                  <svg
+                    className="conexion-svg"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <line
+                      x1="50"
+                      y1="50"
+                      x2={posicion.x}
+                      y2={posicion.y}
+                    />
+                  </svg>
 
-                <div className="pulso" />
+                  <div className="pulso" />
 
-              </div>
-            );
-          })}
-
-          {/* ESTRELLAS */}
+                </div>
+              );
+            }
+          )}
 
           <div className="estrella estrella1" />
           <div className="estrella estrella2" />
@@ -176,8 +421,6 @@ export default function Perfil() {
           <div className="estrella estrella7" />
           <div className="estrella estrella8" />
 
-          {/* ORIGEN */}
-
           <div
             className={
               nexos.length > 0
@@ -185,66 +428,64 @@ export default function Perfil() {
                 : "luz-central"
             }
           >
-
             <span>◎</span>
 
             <small>
               {nombre}
             </small>
-
           </div>
-
-          {/* NEXOS */}
 
           {nexos.length === 0 ? (
 
             <div className="sin-nexos">
-
               Tu constelación todavía
               está esperando.
-
             </div>
 
           ) : (
 
-            nexos.map((nexo, index) => {
+            nexos.map(
+              (nexo, index) => {
 
-              const posicion =
-                posiciones[
-                  index %
-                    posiciones.length
-                ];
+                const posicion =
+                  posiciones[
+                    index %
+                      posiciones.length
+                  ];
 
-              return (
-                <div
-                  key={`${nexo.persona}-${index}`}
-                  className="nexo-luz"
-                  style={{
-                    top:
-                      `${posicion.y}%`,
-                    left:
-                      `${posicion.x}%`,
-                    "--delay":
-                      `${index * 0.7}s`,
-                  }}
-                >
+                return (
+                  <div
+                    key={`${nexo.persona}-${index}`}
+                    className="nexo-luz"
+                    style={{
+                      top:
+                        `${posicion.y}%`,
+                      left:
+                        `${posicion.x}%`,
+                      "--delay":
+                        `${index * 0.7}s`,
+                    }}
+                  >
 
-                  <div className="luz">
-                    ◉
+                    <div className="luz">
+                      ◉
+                    </div>
+
+                    <span>
+                      {nexo.persona}
+                    </span>
+
                   </div>
-
-                  <span>
-                    {nexo.persona}
-                  </span>
-
-                </div>
-              );
-            })
+                );
+              }
+            )
           )}
 
         </div>
 
       </section>
+
+      {/* PENSAMIENTOS */}
 
       <section className="contenido">
 
@@ -255,10 +496,8 @@ export default function Perfil() {
         {misPublicaciones.length === 0 ? (
 
           <div className="vacio">
-
             Todavía no has dejado un
             pensamiento en el Cosmo.
-
           </div>
 
         ) : (
@@ -301,6 +540,8 @@ export default function Perfil() {
         )}
 
       </section>
+
+      {/* NAVEGACIÓN */}
 
       <nav>
 
@@ -387,6 +628,10 @@ export default function Perfil() {
               0.7
             );
 
+          background: white;
+
+          color: black;
+
           display: flex;
 
           align-items: center;
@@ -395,14 +640,72 @@ export default function Perfil() {
 
           font-size: 35px;
 
+          cursor: pointer;
+
           box-shadow:
             0 0 35px
             rgba(
               255,
               255,
               255,
-              0.15
+              0.2
             );
+
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.5s ease;
+        }
+
+        .avatar:active {
+          transform:
+            scale(0.9);
+        }
+
+        .avatar-estado {
+          animation:
+            estadoRespira
+            2.5s
+            ease-in-out
+            infinite;
+        }
+
+        @keyframes estadoRespira {
+
+          0% {
+            transform:
+              scale(1);
+
+            box-shadow:
+              0 0 25px white,
+              0 0 55px
+              rgba(
+                255,
+                255,
+                255,
+                0.4
+              );
+          }
+
+          50% {
+            transform:
+              scale(1.12);
+
+            box-shadow:
+              0 0 35px white,
+              0 0 90px
+              rgba(
+                255,
+                255,
+                255,
+                0.75
+              );
+          }
+
+          100% {
+            transform:
+              scale(1);
+          }
+
         }
 
         .cabecera h1 {
@@ -416,6 +719,266 @@ export default function Perfil() {
         .cabecera p {
           opacity: 0.45;
         }
+
+        .estado-hint {
+          opacity: 0.7 !important;
+
+          font-size: 11px;
+
+          letter-spacing: 1px;
+        }
+
+        /* CREAR ESTADO */
+
+        .crear-estado {
+          width:
+            min(92%, 500px);
+
+          margin:
+            10px auto 30px;
+
+          padding: 25px;
+
+          text-align: center;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.04
+            );
+
+          border:
+            1px solid #333;
+
+          border-radius:
+            22px;
+
+          animation:
+            aparecer
+            0.5s
+            ease;
+        }
+
+        .mini-luz {
+          width: 45px;
+          height: 45px;
+
+          margin: auto;
+
+          border-radius: 50%;
+
+          background: white;
+
+          color: black;
+
+          display: flex;
+
+          align-items: center;
+          justify-content: center;
+
+          box-shadow:
+            0 0 25px white;
+        }
+
+        .crear-estado h2 {
+          font-size: 13px;
+
+          font-weight: 400;
+
+          letter-spacing: 3px;
+        }
+
+        textarea,
+        input {
+          width: 100%;
+
+          display: block;
+
+          border:
+            1px solid #333;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.04
+            );
+
+          color: white;
+
+          outline: none;
+
+          border-radius: 16px;
+
+          padding: 15px;
+
+          font-size: 15px;
+
+          margin-top: 12px;
+        }
+
+        textarea {
+          min-height: 120px;
+
+          resize: none;
+        }
+
+        .estado-botones {
+          display: flex;
+
+          gap: 10px;
+
+          margin-top: 18px;
+        }
+
+        .estado-botones button {
+          flex: 1;
+
+          padding: 12px;
+
+          border:
+            1px solid #444;
+
+          border-radius: 25px;
+
+          background:
+            transparent;
+
+          color: white;
+        }
+
+        .estado-botones .activar {
+          background: white;
+
+          color: black;
+
+          border-color: white;
+        }
+
+        .estado-botones .activar:disabled {
+          opacity: 0.3;
+        }
+
+        .crear-estado > small {
+          display: block;
+
+          margin-top: 15px;
+
+          opacity: 0.35;
+
+          font-size: 10px;
+        }
+
+        /* ESTADO VISIBLE */
+
+        .estado-visible {
+          width:
+            min(92%, 500px);
+
+          margin:
+            5px auto 30px;
+
+          padding:
+            20px;
+
+          text-align: center;
+
+          border:
+            1px solid #333;
+
+          border-radius:
+            20px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.04
+            );
+
+          animation:
+            aparecer
+            0.5s
+            ease;
+        }
+
+        .estado-etiqueta {
+          font-size: 9px;
+
+          letter-spacing: 3px;
+
+          opacity: 0.4;
+        }
+
+        .estado-texto {
+          font-size: 19px;
+
+          line-height: 1.45;
+
+          margin:
+            18px auto;
+        }
+
+        .estado-cancion {
+          display: inline-flex;
+
+          align-items: center;
+
+          gap: 8px;
+
+          padding:
+            9px 15px;
+
+          border:
+            1px solid #333;
+
+          border-radius: 25px;
+
+          font-size: 12px;
+
+          opacity: 0.7;
+        }
+
+        .estado-cancion span {
+          font-size: 18px;
+        }
+
+        .estado-tiempo {
+          margin-top: 15px;
+
+          font-size: 11px;
+
+          opacity: 0.45;
+        }
+
+        .eliminar-estado {
+          margin-top: 18px;
+
+          padding:
+            8px 16px;
+
+          border:
+            1px solid #444;
+
+          border-radius: 20px;
+
+          background:
+            transparent;
+
+          color: white;
+
+          font-size: 9px;
+
+          letter-spacing: 1px;
+
+          opacity: 0.5;
+        }
+
+        /* ESTADÍSTICAS */
 
         .estadisticas {
           width:
@@ -469,6 +1032,8 @@ export default function Perfil() {
 
           opacity: 0.45;
         }
+
+        /* NEXO */
 
         .conexion,
         .contenido {
@@ -528,8 +1093,6 @@ export default function Perfil() {
             );
         }
 
-        /* CONEXIÓN */
-
         .conexion-viva {
           position: absolute;
 
@@ -574,8 +1137,6 @@ export default function Perfil() {
           animation-delay:
             var(--delay);
         }
-
-        /* LUZ QUE VIAJA */
 
         .pulso {
           position: absolute;
@@ -622,7 +1183,6 @@ export default function Perfil() {
           0% {
             left: 50%;
             top: 50%;
-
             opacity: 0;
           }
 
@@ -633,21 +1193,18 @@ export default function Perfil() {
           50% {
             left: var(--x);
             top: var(--y);
-
             opacity: 1;
           }
 
           62% {
             left: var(--x);
             top: var(--y);
-
             opacity: 0.9;
           }
 
           100% {
             left: 50%;
             top: 50%;
-
             opacity: 0;
           }
 
@@ -668,8 +1225,6 @@ export default function Perfil() {
           }
 
         }
-
-        /* ORIGEN */
 
         .luz-central {
           position: absolute;
@@ -695,7 +1250,6 @@ export default function Perfil() {
           display: flex;
 
           align-items: center;
-
           justify-content: center;
 
           font-size: 25px;
@@ -710,13 +1264,6 @@ export default function Perfil() {
               255,
               255,
               0.5
-            ),
-            0 0 110px
-            rgba(
-              255,
-              255,
-              255,
-              0.2
             );
 
           animation:
@@ -788,16 +1335,6 @@ export default function Perfil() {
                 -50%
               )
               scale(1);
-
-            box-shadow:
-              0 0 20px white,
-              0 0 60px
-              rgba(
-                255,
-                255,
-                255,
-                0.5
-              );
           }
 
           50% {
@@ -806,24 +1343,7 @@ export default function Perfil() {
                 -50%,
                 -50%
               )
-              scale(1.16);
-
-            box-shadow:
-              0 0 30px white,
-              0 0 80px
-              rgba(
-                255,
-                255,
-                255,
-                0.8
-              ),
-              0 0 140px
-              rgba(
-                150,
-                190,
-                255,
-                0.35
-              );
+              scale(1.15);
           }
 
           100% {
@@ -836,8 +1356,6 @@ export default function Perfil() {
           }
 
         }
-
-        /* NEXOS */
 
         .nexo-luz {
           position: absolute;
@@ -877,7 +1395,6 @@ export default function Perfil() {
           display: flex;
 
           align-items: center;
-
           justify-content: center;
 
           font-size: 13px;
@@ -907,31 +1424,11 @@ export default function Perfil() {
           0% {
             transform:
               scale(1);
-
-            box-shadow:
-              0 0 15px white,
-              0 0 35px
-              rgba(
-                150,
-                180,
-                255,
-                0.35
-              );
           }
 
           50% {
             transform:
-              scale(1.25);
-
-            box-shadow:
-              0 0 25px white,
-              0 0 50px
-              rgba(
-                150,
-                180,
-                255,
-                0.8
-              );
+              scale(1.2);
           }
 
           100% {
@@ -955,8 +1452,6 @@ export default function Perfil() {
           white-space: nowrap;
         }
 
-        /* ESTRELLAS */
-
         .estrella {
           position: absolute;
 
@@ -971,8 +1466,6 @@ export default function Perfil() {
             0 0 6px white;
 
           opacity: 0.35;
-
-          z-index: 0;
         }
 
         .estrella1 {
@@ -1015,8 +1508,6 @@ export default function Perfil() {
           left: 88%;
         }
 
-        /* SIN NEXOS */
-
         .sin-nexos {
           position: absolute;
 
@@ -1038,8 +1529,6 @@ export default function Perfil() {
           font-size: 14px;
 
           line-height: 1.5;
-
-          z-index: 3;
         }
 
         /* PENSAMIENTOS */
@@ -1150,14 +1639,14 @@ export default function Perfil() {
 
           font-size: 22px;
 
-          opacity: 0.7;
+          opacity: 0.65;
         }
 
         nav a.activo {
           opacity: 1;
 
           text-shadow:
-            0 0 12px white;
+            0 0 15px white;
         }
 
         @keyframes aparecer {
@@ -1166,21 +1655,15 @@ export default function Perfil() {
             opacity: 0;
 
             transform:
-              translate(
-                -50%,
-                -50%
-              )
-              scale(0.7);
+              translateY(12px)
+              scale(0.96);
           }
 
           to {
             opacity: 1;
 
             transform:
-              translate(
-                -50%,
-                -50%
-              )
+              translateY(0)
               scale(1);
           }
 
