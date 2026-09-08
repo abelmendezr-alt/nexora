@@ -171,11 +171,7 @@ return (
 
   <section className="cabecera">
     <button
-      className={
-        estado
-          ? "avatar avatar-estado"
-          : "avatar"
-      }
+      className={estado ? "avatar avatar-estado" : "avatar"}
       onClick={tocarCirculo}
     >
       <span>◉</span>
@@ -211,9 +207,7 @@ return (
       <textarea
         autoFocus
         value={textoEstado}
-        onChange={(e) =>
-          setTextoEstado(e.target.value)
-        }
+        onChange={(e) => setTextoEstado(e.target.value)}
         placeholder="Escribe tu estado..."
       />
 
@@ -224,35 +218,32 @@ return (
       <input
         type="text"
         value={cancionEstado}
-        onChange={(e) =>
-          setCancionEstado(e.target.value)
-        }
+        onChange={(e) => setCancionEstado(e.target.value)}
         placeholder="¿Qué estás escuchando? (opcional)"
       />
 
       <div className="estado-botones">
-  <button
-    className="cancelar-icono"
-    onClick={() => {
-      setCreandoEstado(false);
-      setTextoEstado("");
-      setCancionEstado("");
-    }}
-    aria-label="Cancelar"
-  >
-    ✕
-  </button><button
-className="activar-icono"
-disabled={!textoEstado.trim()}
-onClick={publicarEstado}
-aria-label="Activar estado"
+        <button
+          className="cancelar-icono"
+          onClick={() => {
+            setCreandoEstado(false);
+            setTextoEstado("");
+            setCancionEstado("");
+          }}
+          aria-label="Cancelar"
+        >
+          ✕
+        </button>
 
-«»
-
-◉
-
-  </button>
-</div>
+        <button
+          className="activar-icono"
+          disabled={!textoEstado.trim()}
+          onClick={publicarEstado}
+          aria-label="Activar estado"
+        >
+          ◉
+        </button>
+      </div>
 
       <small>
         Tu estado vivirá durante 3 horas.
@@ -420,10 +411,7 @@ aria-label="Activar estado"
     <Link href="/nexo">⌂</Link>
     <Link href="/explorar">✦</Link>
     <Link href="/crear">＋</Link>
-    <Link
-      href="/perfil"
-      className="activo"
-    >
+    <Link href="/perfil" className="activo">
       ◉
     </Link>
   </nav>
@@ -438,7 +426,7 @@ aria-label="Activar estado"
           #050505 55%
         );
       color: white;
-      padding-bottom: 90px;
+      padding-bottom: 110px;
       font-family: Arial, sans-serif;
       overflow-y: auto;
     }
@@ -577,6 +565,7 @@ aria-label="Activar estado"
     .crear-estado input {
       width: 100%;
       display: block;
+      box-sizing: border-box;
       border: 1px solid #333;
       background: #0b0b0b;
       color: white;
@@ -608,33 +597,57 @@ aria-label="Activar estado"
     }
 
     .estado-botones {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
+      position: relative;
+      height: 58px;
+      margin-top: 14px;
     }
 
     .estado-botones button {
-      flex: 1;
-      padding: 13px;
-      border: 1px solid #444;
-      border-radius: 25px;
-      background: transparent;
-      color: white;
+      position: absolute;
+      bottom: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        opacity .2s ease;
     }
 
-    .estado-botones .activar {
+    .cancelar-icono {
+      left: 0;
+      border: 1px solid #444;
+      background: rgba(255,255,255,.04);
+      color: white;
+      font-size: 17px;
+    }
+
+    .activar-icono {
+      right: 0;
+      border: 1px solid white;
       background: white;
       color: black;
-      border-color: white;
+      font-size: 18px;
+      box-shadow:
+        0 0 20px rgba(255,255,255,.4);
     }
 
-    .estado-botones .activar:disabled {
+    .activar-icono:disabled {
       opacity: .25;
+      box-shadow: none;
+    }
+
+    .estado-botones button:active {
+      transform: scale(.88);
     }
 
     .crear-estado > small {
       display: block;
-      margin-top: 15px;
+      margin-top: 8px;
       opacity: .35;
       font-size: 10px;
     }
