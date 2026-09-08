@@ -231,24 +231,28 @@ return (
       />
 
       <div className="estado-botones">
-        <button
-          onClick={() => {
-            setCreandoEstado(false);
-            setTextoEstado("");
-            setCancionEstado("");
-          }}
-        >
-          CANCELAR
-        </button>
+  <button
+    className="cancelar-icono"
+    onClick={() => {
+      setCreandoEstado(false);
+      setTextoEstado("");
+      setCancionEstado("");
+    }}
+    aria-label="Cancelar"
+  >
+    ✕
+  </button><button
+className="activar-icono"
+disabled={!textoEstado.trim()}
+onClick={publicarEstado}
+aria-label="Activar estado"
 
-        <button
-          className="activar"
-          disabled={!textoEstado.trim()}
-          onClick={publicarEstado}
-        >
-          ACTIVAR
-        </button>
-      </div>
+«»
+
+◉
+
+  </button>
+</div>
 
       <small>
         Tu estado vivirá durante 3 horas.
