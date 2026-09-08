@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 export default function Nexo() {
   const [publicaciones, setPublicaciones] = useState([]);
-  const [seleccionada, setSeleccionada] = useState(null);
 
   useEffect(() => {
     const guardadas = JSON.parse(
@@ -12,204 +11,124 @@ export default function Nexo() {
     );
 
     setPublicaciones(guardadas);
-
-    if (guardadas.length > 0) {
-      const destacada = [...guardadas].sort(
-        (a, b) => {
-          const reaccionesA = Object.values(a.reacciones || {}).reduce(
-            (total, cantidad) => total + cantidad,
-            0
-          );
-
-          const reaccionesB = Object.values(b.reacciones || {}).reduce(
-            (total, cantidad) => total + cantidad,
-            0
-          );
-
-          return reaccionesB - reaccionesA;
-        }
-      )[0];
-
-      setSeleccionada(destacada);
-    }
   }, []);
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#000",
-        color: "white",
-        overflow: "hidden",
-        fontFamily: "Arial, sans-serif",
-        position: "relative",
-      }}
-    >
+    <main className="cosmo">
+      <div className="titulo">NEXORA</div>
 
-      {/* COSMO */}
+      <div className="galaxia">
+        {publicaciones.map((publicacion, index) => {
+          const reacciones = Object.values(
+            publicacion.reacciones || {}
+          ).reduce((total, cantidad) => total + cantidad, 0);
 
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-  "radial-gradient(circle at center, #303030 0%, #101010 35%, #030303 75%)",,
-        }}
-      />
-
-      {/* LUCES */}
-
-      {publicaciones.map((publicacion, index) => {
-        const reacciones = Object.values(
-          publicacion.reacciones || {}
-        ).reduce((total, cantidad) => total + cantidad, 0);
-
-        const posiciones = [
-          { top: "25%", left: "25%" },
-          { top: "30%", left: "75%" },
-          { top: "65%", left: "20%" },
-          { top: "70%", left: "75%" },
-          { top: "45%", left: "50%" },
-        ];
-
-        const posicion =
-          posiciones[index % posiciones.length];
-
-        const esSeleccionada =
-          seleccionada?.id === publicacion.id;
-
-        return (
-          <button
-            key={publicacion.id}
-            onClick={() => setSeleccionada(publicacion)}
-            style={{
-              position: "absolute",
-              top: posicion.top,
-              left: posicion.left,
-
-              width: esSeleccionada
-                ? 90 + reacciones * 4
-                : 28 + reacciones * 3,
-
-              height: esSeleccionada
-                ? 90 + reacciones * 4
-                : 28 + reacciones * 3,
-
-              maxWidth: 150,
-              maxHeight: 150,
-
-              transform: "translate(-50%, -50%)",
-
-              borderRadius: "50%",
-              border: "none",
-
-              background: "white",
-
-              boxShadow: esSeleccionada
-                ? "0 0 40px white, 0 0 100px rgba(255,255,255,.7)"
-                : "0 0 15px rgba(255,255,255,.8)",
-
-              cursor: "pointer",
-
-              transition:
-                "all 1s ease",
-
-              animation:
-                "pulse 4s ease-in-out infinite",
-            }}
-          />
-        );
-      })}
-
-      {/* PENSAMIENTO */}
-
-      {seleccionada && (
-        <section
-          style={{
-            position: "absolute",
-            left: "50%",
-            bottom: "100px",
-            transform: "translateX(-50%)",
-
-            width: "min(90%, 500px)",
-
-            textAlign: "center",
-
-            padding: "25px",
-
-            background:
-              "rgba(0,0,0,.55)",
-
-            backdropFilter: "blur(12px)",
-
-            border:
-              "1px solid rgba(255,255,255,.15)",
-
-            borderRadius: "25px",
-          }}
-        >
-          <div
-            style={{
-              opacity: 0.5,
-              fontSize: "13px",
-              letterSpacing: "3px",
-            }}
-          >
-            {seleccionada.nombre}
-          </div>
-
-          <p
-            style={{
-              fontSize: "21px",
-              marginTop: "15px",
-            }}
-          >
-            {seleccionada.texto}
-          </p>
-
-          <div
-            style={{
-              marginTop: "15px",
-              opacity: 0.6,
-              fontSize: "14px",
-            }}
-          >
-            {Object.values(
-              seleccionada.reacciones || {}
-            ).reduce(
-              (total, cantidad) =>
-                total + cantidad,
-              0
-            )}{" "}
-            conexiones
-          </div>
-        </section>
-      )}
-
-      {/* TÍTULO */}
-
-      <div
-        style={{
-          position: "absolute",
-          top: "25px",
-          left: "25px",
-
-          letterSpacing: "5px",
-
-          fontSize: "14px",
-        }}
-      >
-        NEXORA
+          return (
+            <div
+              key={publicacion.id}
+              className="pensamiento"
+              style={{
+                top: `${25 + (index * 17) % 55}%`,
+                left: `${20 + (index * 23) % 60}%`,
+                width: `${35 + reacciones * 4}px`,
+                height: `${35 + reacciones * 4}px`,
+              }}
+              title={publicacion.texto}
+            />
+          );
+        })}
       </div>
 
+      {publicaciones.length === 0 && (
+        <div className="vacio">
+          El Cosmo está esperando tu primer pensamiento.
+        </div>
+      )}
+
+      <nav>
+        <a href="/nexo">⌂</a>
+        <a href="/explorar">✦</a>
+        <a href="/crear">＋</a>
+        <a href="/perfil">◉</a>
+      </nav>
+
       <style jsx>{`
-        @keyframes pulse {
+        .cosmo {
+          min-height: 100vh;
+          background: radial-gradient(
+            circle at center,
+            #303030 0%,
+            #101010 35%,
+            #000 75%
+          );
+          color: white;
+          position: relative;
+          overflow: hidden;
+          font-family: Arial, sans-serif;
+        }
+
+        .titulo {
+          position: absolute;
+          top: 25px;
+          left: 25px;
+          letter-spacing: 5px;
+          z-index: 5;
+        }
+
+        .galaxia {
+          position: absolute;
+          inset: 0;
+        }
+
+        .pensamiento {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background: white;
+          box-shadow:
+            0 0 15px white,
+            0 0 45px rgba(255, 255, 255, 0.6);
+          animation: respirar 4s ease-in-out infinite;
+          cursor: pointer;
+        }
+
+        .vacio {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+          opacity: 0.6;
+          width: 80%;
+        }
+
+        nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 65px;
+          background: rgba(0, 0, 0, 0.8);
+          border-top: 1px solid #222;
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          z-index: 10;
+        }
+
+        nav a {
+          color: white;
+          text-decoration: none;
+          font-size: 22px;
+        }
+
+        @keyframes respirar {
           0% {
             transform: translate(-50%, -50%) scale(1);
           }
 
           50% {
-            transform: translate(-50%, -50%) scale(1.08);
+            transform: translate(-50%, -50%) scale(1.12);
           }
 
           100% {
@@ -217,7 +136,6 @@ export default function Nexo() {
           }
         }
       `}</style>
-
     </main>
   );
 }
