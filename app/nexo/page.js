@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 export default function Nexo() {
-  const [publicaciones, setPublicaciones] = useState([]);
+  const [destacada, setDestacada] = useState(null);
 
   useEffect(() => {
     const guardadas = JSON.parse(
