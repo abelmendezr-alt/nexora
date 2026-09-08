@@ -87,10 +87,11 @@ export default function Nexo() {
                   : `${35 + total * 4}px`,
                 background: "white",
                 boxShadow: `
-                  0 0 15px white,
-                  0 0 35px ${colores},
-                  0 0 80px ${colores}
-                `,
+  0 0 15px white,
+  0 0 45px ${colores},
+  0 0 100px ${colores},
+  0 0 180px ${colores}
+`,
               }}
             />
           );
