@@ -1,29 +1,136 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const [active, setActive] = useState(false);
+return (
+<main
+style={{
+minHeight: "100vh",
+background: "#050509",
+color: "white",
+display: "flex",
+flexDirection: "column",
+alignItems: "center",
+justifyContent: "center",
+padding: "30px",
+fontFamily: "Arial, sans-serif",
+boxSizing: "border-box",
+}}
+>
+<div style={{ textAlign: "center", marginBottom: "80px" }}>
+<div
+style={{
+fontSize: "14px",
+letterSpacing: "6px",
+opacity: 0.5,
+marginBottom: "20px",
+}}
+>
+EL NEXO
+</div>
 
-  return (
-    <main className="nexora-home">
+    <h1
+      style={{
+        fontSize: "56px",
+        letterSpacing: "8px",
+        margin: 0,
+        fontWeight: 700,
+      }}
+    >
+      NEXORA
+    </h1>
 
-      <div
-        className={`nexora-light ${active ? "active" : ""}`}
-        onClick={() => setActive(true)}
-      />
+    <p
+      style={{
+        fontSize: "18px",
+        opacity: 0.65,
+        marginTop: "18px",
+      }}
+    >
+      Todo está conectado.
+    </p>
+  </div>
 
-      <div className={`nexora-content ${active ? "show" : ""}`}>
-        <h1>NEXORA</h1>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: "14px",
+      width: "100%",
+      maxWidth: "320px",
+    }}
+  >
+    <Link
+      href="/entrar"
+      style={{
+        textAlign: "center",
+        padding: "16px",
+        borderRadius: "14px",
+        background: "white",
+        color: "black",
+        textDecoration: "none",
+        fontWeight: "bold",
+      }}
+    >
+      Entrar
+    </Link>
 
-        <p>Todo está conectado.</p>
+    <Link
+      href="/entrar"
+      style={{
+        textAlign: "center",
+        padding: "16px",
+        borderRadius: "14px",
+        border: "1px solid #333",
+        color: "white",
+        textDecoration: "none",
+      }}
+    >
+      Explorar el nexo
+    </Link>
+  </div>
 
-        <Link href="/entrar" className="enter-button">
-          ENTRAR
-        </Link>
-      </div>
+  <nav
+    style={{
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: "70px",
+      background: "#0b0b10",
+      borderTop: "1px solid #222",
+      display: "flex",
+      justifyContent: "space-around",
+      alignItems: "center",
+    }}
+  >
+    <Link href="/" style={{ color: "white", textDecoration: "none" }}>
+      Inicio
+    </Link>
 
-    </main>
-  );
+    <Link
+      href="/entrar"
+      style={{ color: "#aaa", textDecoration: "none" }}
+    >
+      Nexo
+    </Link>
+
+    <Link
+      href="/entrar"
+      style={{ color: "#aaa", textDecoration: "none" }}
+    >
+      Crear
+    </Link>
+
+    <Link
+      href="/entrar"
+      style={{ color: "#aaa", textDecoration: "none" }}
+    >
+      Perfil
+    </Link>
+  </nav>
+</main>
+
+);
 }
