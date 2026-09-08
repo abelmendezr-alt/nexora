@@ -1,10 +1,16 @@
-"use client";
+ "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 
 export default function Entrar() {
   const [nombre, setNombre] = useState("");
+
+  function guardarNombre() {
+    if (!nombre.trim()) return;
+
+    localStorage.setItem("nexora_nombre", nombre.trim());
+  }
 
   return (
     <main
@@ -52,6 +58,7 @@ export default function Entrar() {
 
       <Link
         href="/nexo"
+        onClick={guardarNombre}
         style={{
           marginTop: "20px",
           padding: "14px 35px",
