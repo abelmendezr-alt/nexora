@@ -110,9 +110,9 @@ export default function Explorar() {
           alignItems: "center",
         }}
       >
-        <Link href="/nexo" style={{ color: "white" }}>
-          ⌂
-        </Link>
+       <Link href="/crear" style={{ color: "white" }}>
+  ＋
+</Link>
 
         <Link href="/explorar" style={{ color: "white" }}>
           ✦
