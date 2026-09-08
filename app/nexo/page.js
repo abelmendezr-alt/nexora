@@ -3,239 +3,221 @@
 import { useEffect, useState } from "react";
 
 export default function Nexo() {
-  const [texto, setTexto] = useState("");
   const [publicaciones, setPublicaciones] = useState([]);
+  const [seleccionada, setSeleccionada] = useState(null);
 
   useEffect(() => {
-    const guardadas = localStorage.getItem("nexora_publicaciones");
+    const guardadas = JSON.parse(
+      localStorage.getItem("nexora_publicaciones") || "[]"
+    );
 
-    if (guardadas) {
-      setPublicaciones(JSON.parse(guardadas));
+    setPublicaciones(guardadas);
+
+    if (guardadas.length > 0) {
+      const destacada = [...guardadas].sort(
+        (a, b) => {
+          const reaccionesA = Object.values(a.reacciones || {}).reduce(
+            (total, cantidad) => total + cantidad,
+            0
+          );
+
+          const reaccionesB = Object.values(b.reacciones || {}).reduce(
+            (total, cantidad) => total + cantidad,
+            0
+          );
+
+          return reaccionesB - reaccionesA;
+        }
+      )[0];
+
+      setSeleccionada(destacada);
     }
   }, []);
-
-  function publicar() {
-    if (!texto.trim()) return;
-
-    const nombre =
-      localStorage.getItem("nexora_nombre") || "Usuario";
-
-    const nueva = {
-      id: Date.now(),
-      nombre,
-      texto: texto.trim(),
-      reacciones: {
-        "♡": 0,
-        "✦": 0,
-        "◉": 0,
-        "∞": 0,
-      },
-    };
-
-    const actualizadas = [nueva, ...publicaciones];
-
-    setPublicaciones(actualizadas);
-
-    localStorage.setItem(
-      "nexora_publicaciones",
-      JSON.stringify(actualizadas)
-    );
-
-    setTexto("");
-  }
-
-  function reaccionar(id, simbolo) {
-    const actualizadas = publicaciones.map((publicacion) => {
-      if (publicacion.id !== id) return publicacion;
-
-      return {
-        ...publicacion,
-        reacciones: {
-          ...publicacion.reacciones,
-          [simbolo]: publicacion.reacciones[simbolo] + 1,
-        },
-      };
-    });
-
-    setPublicaciones(actualizadas);
-
-    localStorage.setItem(
-      "nexora_publicaciones",
-      JSON.stringify(actualizadas)
-    );
-  }
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "#050505",
+        background: "#000",
         color: "white",
+        overflow: "hidden",
         fontFamily: "Arial, sans-serif",
-        paddingBottom: "90px",
+        position: "relative",
       }}
     >
-      <header
+
+      {/* COSMO */}
+
+      <div
         style={{
-          padding: "22px",
-          borderBottom: "1px solid #222",
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at center, #151515 0%, #050505 35%, #000 75%)",
+        }}
+      />
+
+      {/* LUCES */}
+
+      {publicaciones.map((publicacion, index) => {
+        const reacciones = Object.values(
+          publicacion.reacciones || {}
+        ).reduce((total, cantidad) => total + cantidad, 0);
+
+        const posiciones = [
+          { top: "25%", left: "25%" },
+          { top: "30%", left: "75%" },
+          { top: "65%", left: "20%" },
+          { top: "70%", left: "75%" },
+          { top: "45%", left: "50%" },
+        ];
+
+        const posicion =
+          posiciones[index % posiciones.length];
+
+        const esSeleccionada =
+          seleccionada?.id === publicacion.id;
+
+        return (
+          <button
+            key={publicacion.id}
+            onClick={() => setSeleccionada(publicacion)}
+            style={{
+              position: "absolute",
+              top: posicion.top,
+              left: posicion.left,
+
+              width: esSeleccionada
+                ? 90 + reacciones * 4
+                : 28 + reacciones * 3,
+
+              height: esSeleccionada
+                ? 90 + reacciones * 4
+                : 28 + reacciones * 3,
+
+              maxWidth: 150,
+              maxHeight: 150,
+
+              transform: "translate(-50%, -50%)",
+
+              borderRadius: "50%",
+              border: "none",
+
+              background: "white",
+
+              boxShadow: esSeleccionada
+                ? "0 0 40px white, 0 0 100px rgba(255,255,255,.7)"
+                : "0 0 15px rgba(255,255,255,.8)",
+
+              cursor: "pointer",
+
+              transition:
+                "all 1s ease",
+
+              animation:
+                "pulse 4s ease-in-out infinite",
+            }}
+          />
+        );
+      })}
+
+      {/* PENSAMIENTO */}
+
+      {seleccionada && (
+        <section
+          style={{
+            position: "absolute",
+            left: "50%",
+            bottom: "100px",
+            transform: "translateX(-50%)",
+
+            width: "min(90%, 500px)",
+
+            textAlign: "center",
+
+            padding: "25px",
+
+            background:
+              "rgba(0,0,0,.55)",
+
+            backdropFilter: "blur(12px)",
+
+            border:
+              "1px solid rgba(255,255,255,.15)",
+
+            borderRadius: "25px",
+          }}
+        >
+          <div
+            style={{
+              opacity: 0.5,
+              fontSize: "13px",
+              letterSpacing: "3px",
+            }}
+          >
+            {seleccionada.nombre}
+          </div>
+
+          <p
+            style={{
+              fontSize: "21px",
+              marginTop: "15px",
+            }}
+          >
+            {seleccionada.texto}
+          </p>
+
+          <div
+            style={{
+              marginTop: "15px",
+              opacity: 0.6,
+              fontSize: "14px",
+            }}
+          >
+            {Object.values(
+              seleccionada.reacciones || {}
+            ).reduce(
+              (total, cantidad) =>
+                total + cantidad,
+              0
+            )}{" "}
+            conexiones
+          </div>
+        </section>
+      )}
+
+      {/* TÍTULO */}
+
+      <div
+        style={{
+          position: "absolute",
+          top: "25px",
+          left: "25px",
+
           letterSpacing: "5px",
+
+          fontSize: "14px",
         }}
       >
         NEXORA
-      </header>
+      </div>
 
-      <section
-        style={{
-          maxWidth: "600px",
-          margin: "auto",
-          padding: "25px 20px",
-        }}
-      >
-        <h2 style={{ fontWeight: "300" }}>
-          EL NEXO
-        </h2>
+      <style jsx>{`
+        @keyframes pulse {
+          0% {
+            transform: translate(-50%, -50%) scale(1);
+          }
 
-        <p style={{ opacity: 0.5 }}>
-          Lo que ocurre aquí empieza contigo.
-        </p>
+          50% {
+            transform: translate(-50%, -50%) scale(1.08);
+          }
 
-        <div
-          style={{
-            marginTop: "30px",
-            border: "1px solid #222",
-            borderRadius: "18px",
-            padding: "18px",
-          }}
-        >
-          <textarea
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="¿Qué quieres conectar?"
-            style={{
-              width: "100%",
-              minHeight: "90px",
-              background: "transparent",
-              color: "white",
-              border: "none",
-              outline: "none",
-              resize: "none",
-              fontSize: "16px",
-            }}
-          />
+          100% {
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+      `}</style>
 
-          <button
-            onClick={publicar}
-            style={{
-              marginTop: "10px",
-              padding: "10px 22px",
-              borderRadius: "25px",
-              border: "1px solid white",
-              background: "transparent",
-              color: "white",
-              cursor: "pointer",
-            }}
-          >
-            CONECTAR
-          </button>
-        </div>
-
-        {publicaciones.map((publicacion) => (
-          <article
-            key={publicacion.id}
-            style={{
-              marginTop: "30px",
-              padding: "20px",
-              border: "1px solid #222",
-              borderRadius: "18px",
-            }}
-          >
-            <div style={{ opacity: 0.5 }}>
-              ◉ {publicacion.nombre}
-            </div>
-
-            <p
-              style={{
-                marginTop: "18px",
-                fontSize: "18px",
-              }}
-            >
-              {publicacion.texto}
-            </p>
-
-            <div
-              style={{
-                marginTop: "20px",
-                display: "flex",
-                gap: "10px",
-              }}
-            >
-              {Object.entries(publicacion.reacciones).map(
-                ([simbolo, cantidad]) => (
-                  <button
-                    key={simbolo}
-                    onClick={() =>
-                      reaccionar(publicacion.id, simbolo)
-                    }
-                    style={{
-                      background: "transparent",
-                      color: "white",
-                      border: "1px solid #333",
-                      borderRadius: "20px",
-                      padding: "8px 12px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {simbolo} {cantidad}
-                  </button>
-                )
-              )}
-            </div>
-          </article>
-        ))}
-      </section>
-    <nav
-  style={{
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "65px",
-    background: "#050505",
-    borderTop: "1px solid #222",
-    display: "flex",
-    justifyContent: "space-around",
-    alignItems: "center",
-  }}
->
-  <a
-    href="/nexo"
-    style={{ color: "white", textDecoration: "none" }}
-  >
-    ⌂
-  </a>
-
-  <a
-    href="/explorar"
-    style={{ color: "white", textDecoration: "none" }}
-  >
-    ✦
-  </a>
-
-  <a
-    href="/crear"
-    style={{ color: "white", textDecoration: "none" }}
-  >
-    ＋
-  </a>
-
-  <a
-    href="/perfil"
-    style={{ color: "white", textDecoration: "none" }}
-  >
-    ◉
-  </a>
-</nav>
-</main>
+    </main>
   );
 }
