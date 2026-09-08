@@ -97,7 +97,36 @@ export default function Nexo() {
           );
         })}
       </div>
+function reaccionar(simbolo) {
+  if (!destacada) return;
 
+  const actualizadas = publicaciones.map((publicacion) => {
+    if (publicacion.id !== destacada.id) {
+      return publicacion;
+    }
+
+    return {
+      ...publicacion,
+      reacciones: {
+        ...publicacion.reacciones,
+        [simbolo]: (publicacion.reacciones?.[simbolo] || 0) + 1,
+      },
+    };
+  });
+
+  setPublicaciones(actualizadas);
+
+  const nuevaDestacada = actualizadas.find(
+    (publicacion) => publicacion.id === destacada.id
+  );
+
+  setDestacada(nuevaDestacada);
+
+  localStorage.setItem(
+    "nexora_publicaciones",
+    JSON.stringify(actualizadas)
+  );
+}
       {destacada && (
         <div className="pensamiento-info">
           <div className="autor">
