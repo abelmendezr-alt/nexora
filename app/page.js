@@ -105,27 +105,42 @@ EL NEXO
       alignItems: "center",
     }}
   >
-    <Link href="/" style={{ color: "white", textDecoration: "none" }}>
+    <Link
+      href="/"
+      style={{
+        color: "white",
+        textDecoration: "none",
+      }}
+    >
       Inicio
     </Link>
 
     <Link
-      href="/entrar"
-      style={{ color: "#aaa", textDecoration: "none" }}
+      href="/nexo"
+      style={{
+        color: "#aaa",
+        textDecoration: "none",
+      }}
     >
       Nexo
     </Link>
 
     <Link
-      href="/entrar"
-      style={{ color: "#aaa", textDecoration: "none" }}
+      href="/crear"
+      style={{
+        color: "#aaa",
+        textDecoration: "none",
+      }}
     >
       Crear
     </Link>
 
     <Link
       href="/perfil"
-      style={{ color: "#aaa", textDecoration: "none" }}
+      style={{
+        color: "#aaa",
+        textDecoration: "none",
+      }}
     >
       Perfil
     </Link>
