@@ -1335,73 +1335,55 @@ export default function Nexo() {
 
         /* ESCRITORIO */
 
-        @media (min-width: 700px) {
+       @media (max-width: 500px) {
 
-          .header {
-            padding: 0 42px;
-          }
+  .nexo {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: visible !important;
+    padding-bottom: 160px;
+  }
 
-          .bienvenida {
-            padding-top: 34px;
-          }
+  .galaxia {
+    width: 94vw;
+    height: 94vw;
+    margin: 8px auto 50px;
+  }
 
-          .bienvenida h1 {
-            font-size: 29px;
-          }
+  .flujo {
+    position: relative;
+    width: calc(100% - 30px);
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
 
-          .galaxia {
-            width: 520px;
-            height: 520px;
-            margin-top: 5px;
-            margin-bottom: 30px;
-          }
-
-          .nodo {
-            width: 82px;
-            height: 82px;
-          }
-
-          .origen {
-            transform:
-              translate(-50%, -50%)
-              scale(.92);
-          }
-
-          .flujo {
-            width: min(88%, 680px);
-          }
-
-        }
+}
 
 
         /* CELULAR */
 
 @media (max-width: 500px) {
 
-  .botonFlotante {
-    width: 46px;
-    height: 46px;
-    font-size: 19px;
+  .nexo {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: visible !important;
+    padding-bottom: 160px;
   }
 
-  .crear {
-    left: 16px;
-    bottom: 18px;
+  .galaxia {
+    width: 94vw;
+    height: 94vw;
+    margin: 8px auto 50px;
   }
 
-  .explorar {
-    right: 16px;
-    bottom: 18px;
-  }
-
-  .perfilFlotante {
-    right: 16px;
-    top: 78px;
-  }
-
-}
-  .pensamiento {
-    font-size: 17px;
+  .flujo {
+    position: relative;
+    width: calc(100% - 30px);
+    margin: 0 auto;
+    padding-bottom: 40px;
   }
 
 }
