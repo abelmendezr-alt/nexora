@@ -1371,84 +1371,30 @@ export default function Nexo() {
 
         /* CELULAR */
 
-        @media (max-width: 500px) {
-
-  .nexo {
-    min-height: 100vh;
-    height: auto;
-    padding-bottom: 140px;
-    overflow-x: hidden;
-    overflow-y: visible;
-  }
-
-  .header {
-    position: relative;
-    z-index: 40;
-  }
-
-  .bienvenida {
-    padding-top: 25px;
-  }
-
-  .galaxia {
-    width: 94vw;
-    height: 94vw;
-    margin-top: 8px;
-    margin-bottom: 45px;
-  }
-
-  .nodo {
-    width: 58px;
-    height: 58px;
-  }
-
-  .origen {
-    transform:
-      translate(-50%, -50%)
-      scale(.82);
-  }
-
-  .flujo {
-    width: calc(100% - 30px);
-    margin: 0 auto;
-    padding-bottom: 30px;
-  }
-
-  .lista {
-    gap: 12px;
-  }
-
-  .lista article {
-    padding: 18px;
-    min-height: 100px;
-  }
-
-  .lista article p {
-    font-size: 15px;
-    line-height: 1.55;
-    margin: 10px 0 14px;
-  }
+@media (max-width: 500px) {
 
   .botonFlotante {
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
+    font-size: 19px;
   }
 
   .crear {
-    left: 15px;
-    bottom: 20px;
+    left: 16px;
+    bottom: 18px;
   }
 
   .explorar {
-    right: 15px;
-    bottom: 20px;
+    right: 16px;
+    bottom: 18px;
   }
 
   .perfilFlotante {
-    right: 15px;
-    top: 82px;
+    right: 16px;
+    top: 78px;
   }
 
+}
   .pensamiento {
     font-size: 17px;
   }
