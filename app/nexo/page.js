@@ -1330,14 +1330,14 @@ export default function Nexo() {
 
         /* ESCRITORIO */
 
-       @media (max-width: 500px) {
+       ¿@media (max-width: 500px) {
 
   .nexo {
-    height: auto !important;
+    width: 100%;
     min-height: 100vh;
+    height: auto;
+    padding-bottom: 180px;
     overflow-x: hidden;
-    overflow-y: visible !important;
-    padding-bottom: 160px;
   }
 
   .galaxia {
@@ -1347,12 +1347,39 @@ export default function Nexo() {
   }
 
   .flujo {
-    position: relative;
     width: calc(100% - 30px);
     margin: 0 auto;
-    padding-bottom: 40px;
+    padding-bottom: 60px;
   }
 
+  .lista {
+    width: 100%;
+  }
+
+  .lista article {
+    width: 100%;
+  }
+
+  .botonFlotante {
+    width: 46px;
+    height: 46px;
+  }
+
+  .crear {
+    left: 16px;
+    bottom: 18px;
+  }
+
+  .explorar {
+    right: 16px;
+    bottom: 18px;
+  }
+
+  .perfilFlotante {
+    right: 16px;
+    top: 78px;
+  }
+}
 }
 
 
@@ -1361,11 +1388,11 @@ export default function Nexo() {
 @media (max-width: 500px) {
 
   .nexo {
-    height: auto !important;
+    width: 100%;
     min-height: 100vh;
+    height: auto;
+    padding-bottom: 180px;
     overflow-x: hidden;
-    overflow-y: visible !important;
-    padding-bottom: 160px;
   }
 
   .galaxia {
@@ -1375,12 +1402,38 @@ export default function Nexo() {
   }
 
   .flujo {
-    position: relative;
     width: calc(100% - 30px);
     margin: 0 auto;
-    padding-bottom: 40px;
+    padding-bottom: 60px;
   }
 
+  .lista {
+    width: 100%;
+  }
+
+  .lista article {
+    width: 100%;
+  }
+
+  .botonFlotante {
+    width: 46px;
+    height: 46px;
+  }
+
+  .crear {
+    left: 16px;
+    bottom: 18px;
+  }
+
+  .explorar {
+    right: 16px;
+    bottom: 18px;
+  }
+
+  .perfilFlotante {
+    right: 16px;
+    top: 78px;
+  }
 }
 
       `}</style>
