@@ -724,12 +724,14 @@ export default function Nexo() {
         /* GALAXIA */
 
         .galaxia {
-          position: relative;
-          width: min(90vw, 540px);
-          height: min(90vw, 540px);
-          margin: 8px auto 32px;
-          border-radius: 50%;
-        }
+  position: relative;
+  width: min(90vw, 540px);
+  height: min(90vw, 540px);
+  margin: 8px auto 50px;
+  border-radius: 50%;
+
+  flex-shrink: 0;
+}
 
         .orbita {
           position: absolute;
