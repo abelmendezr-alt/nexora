@@ -1184,50 +1184,45 @@ export default function Nexo() {
 
         /* BOTONES */
 
-        .botonFlotante {
-          position: fixed;
-          width: 48px;
-          height: 48px;
-          border:
-            1px solid
-            rgba(255,255,255,.2);
-          border-radius: 50%;
-          background:
-            rgba(5,5,5,.75);
-          backdrop-filter:
-            blur(8px);
-          color: white;
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 21px;
-          z-index: 30;
-          transition: .3s ease;
-        }
+.botonFlotante {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  background: rgba(5,5,5,.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  z-index: 50;
+  transition: .3s ease;
+}
 
-        .botonFlotante:hover {
-          border-color: white;
-          box-shadow:
-            0 0 20px
-            rgba(255,255,255,.2);
-        }
+.botonFlotante:hover {
+  border-color: white;
+  box-shadow:
+    0 0 20px rgba(255,255,255,.2);
+}
 
-        .crear {
-          left: 22px;
-          bottom: 28px;
-        }
+.crear {
+  left: 22px;
+  bottom: 28px;
+}
 
-        .explorar {
-          right: 22px;
-          bottom: 28px;
-        }
+.explorar {
+  right: 22px;
+  bottom: 28px;
+}
 
-        .perfilFlotante {
-          right: 22px;
-          top: 90px;
-        }
-
+.perfilFlotante {
+  right: 22px;
+  top: 90px;
+}
 
         /* ANIMACIONES */
 
