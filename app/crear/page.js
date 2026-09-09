@@ -22,9 +22,15 @@ export default function Crear() {
       nombre,
       texto: contenido,
       creado: Date.now(),
+
+      // La reacción con la que nace el pensamiento
       reacciones: {
         [reaccionInicial]: 1,
       },
+
+      // Datos visuales para la galaxia
+      simbolo: reaccionInicial,
+      conexiones: 0,
     };
 
     const anteriores = JSON.parse(
@@ -84,12 +90,15 @@ export default function Crear() {
 
         <div className="reacciones">
 
-          <span>¿Cómo quieres iniciarlo?</span>
+          <span>
+            ¿Cómo quieres iniciarlo?
+          </span>
 
           <div>
             {["✦", "♡", "◉", "∞"].map((simbolo) => (
               <button
                 key={simbolo}
+                type="button"
                 className={
                   reaccionInicial === simbolo
                     ? "seleccionado"
@@ -114,7 +123,10 @@ export default function Crear() {
           CONECTAR
         </button>
 
-        <Link href="/nexo" className="volver">
+        <Link
+          href="/nexo"
+          className="volver"
+        >
           ← volver al nexo
         </Link>
 
