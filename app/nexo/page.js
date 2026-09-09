@@ -1312,8 +1312,8 @@ export default function Nexo() {
         }
 
        @keyframes aparecer {
-   ...
-}
+          ...
+       }
 
 
 /* CELULAR */
