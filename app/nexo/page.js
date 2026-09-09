@@ -6,7 +6,6 @@ import Link from "next/link";
 export default function Nexo() {
   const [nombre, setNombre] = useState("Usuario");
   const [publicaciones, setPublicaciones] = useState([]);
-  const [nexos, setNexos] = useState([]);
   const [seleccionado, setSeleccionado] = useState(null);
   const [reaccionando, setReaccionando] = useState(false);
 
@@ -24,52 +23,83 @@ export default function Nexo() {
   ];
 
   useEffect(() => {
-    setNombre(
-      localStorage.getItem("nexora_nombre") || "Usuario"
+    cargarDatos();
+
+    const actualizar = () => cargarDatos();
+
+    window.addEventListener(
+      "nexora-actualizado",
+      actualizar
     );
 
-    setPublicaciones(
-      JSON.parse(
-        localStorage.getItem("nexora_publicaciones") || "[]"
-      )
+    window.addEventListener(
+      "storage",
+      actualizar
     );
 
-    setNexos(
-      JSON.parse(
-        localStorage.getItem("nexora_nexos") || "[]"
-      )
-    );
+    return () => {
+      window.removeEventListener(
+        "nexora-actualizado",
+        actualizar
+      );
+
+      window.removeEventListener(
+        "storage",
+        actualizar
+      );
+    };
   }, []);
 
+  function cargarDatos() {
+    setNombre(
+      localStorage.getItem("nexora_nombre") ||
+        "Usuario"
+    );
+
+    const guardadas = JSON.parse(
+      localStorage.getItem(
+        "nexora_publicaciones"
+      ) || "[]"
+    );
+
+    setPublicaciones(guardadas);
+  }
+
   function totalReacciones(nexo) {
-    if (typeof nexo.reacciones === "number") {
+    if (!nexo?.reacciones) return 0;
+
+    if (
+      typeof nexo.reacciones === "number"
+    ) {
       return nexo.reacciones;
     }
 
-    if (nexo.reacciones) {
-      return Object.values(nexo.reacciones).reduce(
-        (total, cantidad) => total + cantidad,
-        0
-      );
-    }
-
-    return 0;
+    return Object.values(
+      nexo.reacciones
+    ).reduce(
+      (total, cantidad) =>
+        total + Number(cantidad || 0),
+      0
+    );
   }
 
   function energia(nexo) {
-    const total = totalReacciones(nexo);
+    const total =
+      totalReacciones(nexo);
 
     if (total >= 30) return "alta";
-    if (total >= 15) return "media";
+    if (total >= 10) return "media";
+
     return "baja";
   }
 
   function tamaño(nexo) {
-    const total = totalReacciones(nexo);
+    const total =
+      totalReacciones(nexo);
 
     return Math.min(
-      62,
-      30 + total * 1.2
+      72,
+      34 + total * 2
     );
   }
 
@@ -85,43 +115,65 @@ export default function Nexo() {
   }
 
   function reaccionar() {
-    if (!seleccionado || reaccionando) return;
+    if (
+      !seleccionado ||
+      reaccionando
+    ) {
+      return;
+    }
 
     setReaccionando(true);
 
-    const nuevosNexos = [...nexos];
+    const guardadas = JSON.parse(
+      localStorage.getItem(
+        "nexora_publicaciones"
+      ) || "[]"
+    );
 
-    const indexReal = seleccionado.index;
+    const index =
+      guardadas.findIndex(
+        (p) =>
+          p.id === seleccionado.id
+      );
 
-    if (!nuevosNexos[indexReal]) {
+    if (index === -1) {
       setReaccionando(false);
       return;
     }
 
-    const actual =
-      nuevosNexos[indexReal].reacciones || 0;
+    const publicacion =
+      guardadas[index];
 
-    nuevosNexos[indexReal] = {
-      ...nuevosNexos[indexReal],
-      reacciones:
-        typeof actual === "number"
-          ? actual + 1
-          : totalReacciones(
-              nuevosNexos[indexReal]
-            ) + 1,
+    const reacciones = {
+      ...(publicacion.reacciones || {}),
+    };
+
+    const simbolo =
+      publicacion.simbolo || "✦";
+
+    reacciones[simbolo] =
+      Number(reacciones[simbolo] || 0) + 1;
+
+    guardadas[index] = {
+      ...publicacion,
+      reacciones,
     };
 
     localStorage.setItem(
-      "nexora_nexos",
-      JSON.stringify(nuevosNexos)
+      "nexora_publicaciones",
+      JSON.stringify(guardadas)
     );
 
-    setNexos(nuevosNexos);
+    setPublicaciones(guardadas);
 
     setSeleccionado({
-      ...nuevosNexos[indexReal],
-      index: indexReal,
+      ...guardadas[index],
+      index,
     });
+
+    window.dispatchEvent(
+      new Event("nexora-actualizado")
+    );
 
     setTimeout(() => {
       setReaccionando(false);
@@ -129,13 +181,49 @@ export default function Nexo() {
   }
 
   const conexiones =
-    nexos.length > 0
-      ? nexos
+    publicaciones.length > 0
+      ? publicaciones.slice(0, 10)
       : [
-          { persona: "Nexo", reacciones: 7 },
-          { persona: "Cosmo", reacciones: 16 },
-          { persona: "Origen", reacciones: 28 },
-          { persona: "Conexión", reacciones: 11 },
+          {
+            id: "demo-1",
+            nombre: "Nexo",
+            texto:
+              "Todo comienza con una conexión.",
+            simbolo: "✦",
+            reacciones: {
+              "✦": 7,
+            },
+          },
+          {
+            id: "demo-2",
+            nombre: "Cosmo",
+            texto:
+              "Hay cosas que solo aparecen cuando miramos juntos.",
+            simbolo: "♡",
+            reacciones: {
+              "♡": 16,
+            },
+          },
+          {
+            id: "demo-3",
+            nombre: "Origen",
+            texto:
+              "Volvamos al origen.",
+            simbolo: "◉",
+            reacciones: {
+              "◉": 28,
+            },
+          },
+          {
+            id: "demo-4",
+            nombre: "Conexión",
+            texto:
+              "Una idea puede encontrar otra.",
+            simbolo: "∞",
+            reacciones: {
+              "∞": 11,
+            },
+          },
         ];
 
   return (
@@ -203,7 +291,7 @@ export default function Nexo() {
                 top:
                   `${(index * 61) % 100}%`,
                 animationDelay:
-                  `${(index % 8) * .5}s`,
+                  `${(index % 8) * 0.5}s`,
               }}
             />
 
@@ -212,7 +300,7 @@ export default function Nexo() {
         </div>
 
 
-        {/* CONEXIONES */}
+        {/* LÍNEAS */}
 
         <div className="lineas">
 
@@ -227,7 +315,7 @@ export default function Nexo() {
 
               return (
                 <svg
-                  key={index}
+                  key={`linea-${index}`}
                   viewBox="0 0 100 100"
                   preserveAspectRatio="none"
                 >
@@ -239,7 +327,7 @@ export default function Nexo() {
                     y2={posicion.y}
                     style={{
                       animationDelay:
-                        `${index * .5}s`,
+                        `${index * 0.5}s`,
                     }}
                   />
 
@@ -270,7 +358,7 @@ export default function Nexo() {
 
             return (
               <button
-                key={`${nexo.persona}-${index}`}
+                key={`${nexo.id}-${index}`}
                 className={`nodo ${nivel}`}
                 style={{
                   left:
@@ -280,7 +368,7 @@ export default function Nexo() {
                   "--size":
                     `${size}px`,
                   "--delay":
-                    `${index * .6}s`,
+                    `${index * 0.6}s`,
                 }}
                 onClick={() =>
                   abrirNexo(
@@ -291,13 +379,19 @@ export default function Nexo() {
               >
 
                 <div className="nodoLuz">
-                  ◉
+
+                  {nexo.simbolo || "◉"}
+
                 </div>
 
-                {nexos.length > 0 && (
+                {publicaciones.length > 0 && (
+
                   <span>
-                    {nexo.persona}
+                    {nexo.nombre ||
+                      nexo.persona ||
+                      "Nexo"}
                   </span>
+
                 )}
 
               </button>
@@ -347,7 +441,7 @@ export default function Nexo() {
       </section>
 
 
-      {/* NEXO ABIERTO */}
+      {/* PANEL */}
 
       {seleccionado && (
 
@@ -370,23 +464,28 @@ export default function Nexo() {
 
           <div
             className={`panelLuz ${
-              energia(
-                seleccionado
-              )
+              energia(seleccionado)
             }`}
           >
-            ◉
+            {seleccionado.simbolo ||
+              "◉"}
           </div>
 
 
           <h2>
-            {seleccionado.persona}
+            {seleccionado.nombre ||
+              seleccionado.persona ||
+              "Nexo"}
           </h2>
 
-          <p>
-            Esta conexión está
-            creciendo dentro del nexo.
-          </p>
+
+          {seleccionado.texto && (
+
+            <p className="textoNexo">
+              {seleccionado.texto}
+            </p>
+
+          )}
 
 
           <div className="energia">
@@ -418,15 +517,9 @@ export default function Nexo() {
                   : ""
               }
             >
-              ✦
-              {" "}
+              {seleccionado.simbolo ||
+                "✦"}{" "}
               REACCIONAR
-            </button>
-
-            <button>
-              ∞
-              {" "}
-              CONECTAR
             </button>
 
           </div>
@@ -515,6 +608,7 @@ export default function Nexo() {
                               cantidad,
                             ]
                           ) => (
+
                             <span
                               key={
                                 simbolo
@@ -523,6 +617,7 @@ export default function Nexo() {
                               {simbolo}{" "}
                               {cantidad}
                             </span>
+
                           )
                         )}
 
@@ -542,7 +637,7 @@ export default function Nexo() {
       )}
 
 
-      {/* CREAR */}
+      {/* BOTONES */}
 
       <Link
         href="/crear"
@@ -553,8 +648,6 @@ export default function Nexo() {
       </Link>
 
 
-      {/* EXPLORAR */}
-
       <Link
         href="/explorar"
         className="botonFlotante explorar"
@@ -563,8 +656,6 @@ export default function Nexo() {
         ✦
       </Link>
 
-
-      {/* PERFIL */}
 
       <Link
         href="/perfil"
@@ -795,7 +886,8 @@ export default function Nexo() {
         }
 
         .nodo:hover .nodoLuz {
-          transform: scale(1.12);
+          transform:
+            scale(1.12);
         }
 
         .nodo span {
@@ -920,6 +1012,7 @@ export default function Nexo() {
           background: transparent;
           color: white;
           font-size: 24px;
+          cursor: pointer;
         }
 
         .panelLuz {
@@ -936,6 +1029,13 @@ export default function Nexo() {
             0 0 25px white;
         }
 
+        .panelLuz.media {
+          box-shadow:
+            0 0 25px white,
+            0 0 60px
+            rgba(180,195,255,.5);
+        }
+
         .panelLuz.alta {
           box-shadow:
             0 0 30px white,
@@ -948,9 +1048,12 @@ export default function Nexo() {
           letter-spacing: 3px;
         }
 
-        .panel p {
-          font-size: 12px;
-          opacity: .4;
+        .textoNexo {
+          font-size: 15px !important;
+          line-height: 1.6;
+          opacity: .65 !important;
+          max-width: 420px;
+          margin: 15px auto 22px;
         }
 
         .energia {
