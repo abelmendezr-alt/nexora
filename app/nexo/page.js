@@ -1311,24 +1311,12 @@ export default function Nexo() {
 
         }
 
-        @keyframes aparecer {
-
-          from {
-            opacity: 0;
-            transform:
-              translateY(12px);
-          }
-
-          to {
-            opacity: 1;
-            transform:
-              translateY(0);
-          }
-
-        }
+       @keyframes aparecer {
+   ...
+}
 
 
-        /* CELULAR */
+/* CELULAR */
 
 @media (max-width: 500px) {
 
