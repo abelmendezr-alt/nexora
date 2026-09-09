@@ -1311,66 +1311,77 @@ export default function Nexo() {
 
         }
 
-       @keyframes aparecer {
-          ...
-       }
+               @keyframes aparecer {
+
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+
+        }
 
 
-/* CELULAR */
+        /* CELULAR */
 
-@media (max-width: 500px) {
+        @media (max-width: 500px) {
 
-  .nexo {
-    width: 100%;
-    min-height: 100vh;
-    height: auto;
-    padding-bottom: 180px;
-    overflow-x: hidden;
-  }
+          .nexo {
+            width: 100%;
+            min-height: 100vh;
+            height: auto;
+            padding-bottom: 180px;
+            overflow-x: hidden;
+          }
 
-  .galaxia {
-    width: 94vw;
-    height: 94vw;
-    margin: 8px auto 50px;
-  }
+          .galaxia {
+            width: 94vw;
+            height: 94vw;
+            margin: 8px auto 50px;
+          }
 
-  .flujo {
-    width: calc(100% - 30px);
-    margin: 0 auto;
-    padding-bottom: 60px;
-  }
+          .flujo {
+            width: calc(100% - 30px);
+            margin: 0 auto;
+            padding-bottom: 60px;
+          }
 
-  .lista {
-    width: 100%;
-  }
+          .lista {
+            width: 100%;
+          }
 
-  .lista article {
-    width: 100%;
-  }
+          .lista article {
+            width: 100%;
+          }
 
-  .botonFlotante {
-    width: 46px;
-    height: 46px;
-  }
+          .botonFlotante {
+            width: 46px;
+            height: 46px;
+          }
 
-  .crear {
-    left: 16px;
-    bottom: 18px;
-  }
+          .crear {
+            left: 16px;
+            bottom: 18px;
+          }
 
-  .explorar {
-    right: 16px;
-    bottom: 18px;
-  }
+          .explorar {
+            right: 16px;
+            bottom: 18px;
+          }
 
-  .perfilFlotante {
-    right: 16px;
-    top: 78px;
-  }
+          .perfilFlotante {
+            right: 16px;
+            top: 78px;
+          }
 
-}
+        }
+
+      `}</style>
+
     </main>
   );
 }
-
-</style>
