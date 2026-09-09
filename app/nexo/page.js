@@ -1372,3 +1372,5 @@ export default function Nexo() {
     </main>
   );
 }
+
+</style>
