@@ -726,8 +726,6 @@ export default function Nexo() {
   height: min(90vw, 540px);
   margin: 8px auto 50px;
   border-radius: 50%;
-
-  flex-shrink: 0;
 }
 
         .orbita {
