@@ -650,8 +650,10 @@ export default function Nexo() {
         }
 
         .nexo {
+  position: relative;
   min-height: 100vh;
-  height: auto;
+  height: auto !important;
+  width: 100%;
   background:
     radial-gradient(
       circle at 50% 25%,
@@ -661,11 +663,12 @@ export default function Nexo() {
     );
   color: white;
   font-family: Arial, sans-serif;
-  padding-bottom: 140px;
-  overflow-x: hidden;
-  overflow-y: visible;
-}
 
+  padding-bottom: 160px;
+
+  overflow-x: hidden;
+  overflow-y: visible !important;
+}
         /* HEADER */
 
         .header {
