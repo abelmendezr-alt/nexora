@@ -1,1387 +1,534 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+
+const publicacionesIniciales = [
+  { id: 1, usuario: "Usuario", texto: "Hola", reacciones: 1 },
+  { id: 2, usuario: "Usuario", texto: "Hola", reacciones: 1 },
+  { id: 3, usuario: "Usuario", texto: "Holq", reacciones: 0 },
+  { id: 4, usuario: "Usuario", texto: "Ffff", reacciones: 11 },
+  { id: 5, usuario: "Usuario", texto: "Ghhj", reacciones: 0 },
+];
+
+const nodos = [
+  { nombre: "Mateo", size: "large" },
+  { nombre: "Sofía", size: "large" },
+  { nombre: "Usuario", size: "small" },
+  { nombre: "Usuario", size: "medium" },
+  { nombre: "Usuario", size: "small" },
+  { nombre: "Usuario", size: "small" },
+  { nombre: "Diego", size: "large" },
+  { nombre: "Valeria", size: "large" },
+  { nombre: "Luna", size: "large" },
+];
 
 export default function Nexo() {
   const [nombre, setNombre] = useState("Usuario");
-  const [publicaciones, setPublicaciones] = useState([]);
-  const [seleccionado, setSeleccionado] = useState(null);
-  const [reaccionando, setReaccionando] = useState(false);
-
-  const posiciones = [
-    { x: 14, y: 20 },
-    { x: 84, y: 18 },
-    { x: 8, y: 50 },
-    { x: 92, y: 50 },
-    { x: 18, y: 80 },
-    { x: 82, y: 82 },
-    { x: 35, y: 8 },
-    { x: 65, y: 8 },
-    { x: 35, y: 92 },
-    { x: 65, y: 92 },
-  ];
+  const [publicaciones, setPublicaciones] = useState(
+    publicacionesIniciales
+  );
 
   useEffect(() => {
-    setNombre(
-      localStorage.getItem("nexora_nombre") || "Usuario"
-    );
+    const guardado = localStorage.getItem("nexora_nombre");
 
-    cargarPublicaciones();
+    if (guardado) {
+      setNombre(guardado);
+    }
   }, []);
 
-  function cargarPublicaciones() {
-    try {
-      const guardadas = JSON.parse(
-        localStorage.getItem("nexora_publicaciones") || "[]"
-      );
-
-      setPublicaciones(
-        Array.isArray(guardadas) ? guardadas : []
-      );
-    } catch {
-      setPublicaciones([]);
-    }
-  }
-
-  function totalReacciones(publicacion) {
-    if (
-      typeof publicacion.reacciones === "number"
-    ) {
-      return publicacion.reacciones;
-    }
-
-    if (publicacion.reacciones) {
-      return Object.values(
-        publicacion.reacciones
-      ).reduce(
-        (total, cantidad) =>
-          total + Number(cantidad || 0),
-        0
-      );
-    }
-
-    return 0;
-  }
-
-  function energia(publicacion) {
-    const total =
-      totalReacciones(publicacion);
-
-    if (total >= 10) return "alta";
-    if (total >= 5) return "media";
-
-    return "baja";
-  }
-
-  function tamaño(publicacion) {
-    const total =
-      totalReacciones(publicacion);
-
-    return Math.min(
-      68,
-      34 + total * 2
+  function reaccionar(id) {
+    setPublicaciones((actuales) =>
+      actuales.map((publicacion) =>
+        publicacion.id === id
+          ? {
+              ...publicacion,
+              reacciones: publicacion.reacciones + 1,
+            }
+          : publicacion
+      )
     );
-  }
-
-  function abrirPensamiento(
-    publicacion,
-    index
-  ) {
-    setSeleccionado({
-      ...publicacion,
-      index,
-    });
-  }
-
-  function cerrarPensamiento() {
-    setSeleccionado(null);
-  }
-
-  function reaccionar() {
-    if (
-      !seleccionado ||
-      reaccionando
-    ) {
-      return;
-    }
-
-    setReaccionando(true);
-
-    const nuevas =
-      [...publicaciones];
-
-    const index =
-      seleccionado.index;
-
-    if (!nuevas[index]) {
-      setReaccionando(false);
-      return;
-    }
-
-    const actual =
-      nuevas[index].reacciones;
-
-    if (
-      typeof actual === "number"
-    ) {
-      nuevas[index] = {
-        ...nuevas[index],
-        reacciones: actual + 1,
-      };
-    } else {
-      const reacciones = {
-        ...(actual || {}),
-      };
-
-      const simbolo = "✦";
-
-      reacciones[simbolo] =
-        Number(
-          reacciones[simbolo] || 0
-        ) + 1;
-
-      nuevas[index] = {
-        ...nuevas[index],
-        reacciones,
-      };
-    }
-
-    localStorage.setItem(
-      "nexora_publicaciones",
-      JSON.stringify(nuevas)
-    );
-
-    setPublicaciones(nuevas);
-
-    setSeleccionado({
-      ...nuevas[index],
-      index,
-    });
-
-    setTimeout(() => {
-      setReaccionando(false);
-    }, 350);
   }
 
   return (
-    <main className="nexo">
+    <main className="nexo-page">
+      <header className="topbar">
+        <div className="logo">NEXORA</div>
 
-      {/* HEADER */}
-
-      <header className="header">
-
-        <Link
-          href="/nexo"
-          className="marca"
-        >
-          NEXORA
-        </Link>
-
-        <Link
-          href="/perfil"
-          className="perfil"
-        >
-          ◉
-        </Link>
-
+        <div className="origin-mini">
+          ◎
+        </div>
       </header>
 
+      <section className="intro">
+        <div className="eyebrow">EL NEXO</div>
 
-      {/* BIENVENIDA */}
+        <h1>{nombre}</h1>
 
-      <section className="bienvenida">
-
-        <span>
-          EL NEXO
-        </span>
-
-        <h1>
-          {nombre}
-        </h1>
-
-        <p>
-          Todo está conectado.
-        </p>
-
+        <p>Todo está conectado.</p>
       </section>
 
+      <section className="cosmos">
+        <div className="orbit orbit-one" />
+        <div className="orbit orbit-two" />
+        <div className="orbit orbit-three" />
 
-      {/* GALAXIA */}
+        <div className="origin">
+          <div className="origin-core">
+            ◎
+          </div>
 
-      <section className="galaxia">
-
-        <div className="orbita orbita1" />
-        <div className="orbita orbita2" />
-        <div className="orbita orbita3" />
-
-
-        {/* ESTRELLAS */}
-
-        <div className="estrellas">
-
-          {Array.from({
-            length: 40,
-          }).map((_, index) => (
-
-            <i
-              key={index}
-              style={{
-                left:
-                  `${(index * 37) % 100}%`,
-                top:
-                  `${(index * 61) % 100}%`,
-                animationDelay:
-                  `${(index % 8) * .5}s`,
-              }}
-            />
-
-          ))}
-
+          <span>ORIGEN</span>
         </div>
 
-
-        {/* LINEAS */}
-
-        <div className="lineas">
-
-          {publicaciones.map(
-            (publicacion, index) => {
-
-              const posicion =
-                posiciones[
-                  index %
-                  posiciones.length
-                ];
-
-              return (
-                <svg
-                  key={
-                    publicacion.id
-                  }
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-
-                  <line
-                    x1="50"
-                    y1="50"
-                    x2={posicion.x}
-                    y2={posicion.y}
-                    style={{
-                      animationDelay:
-                        `${index * .4}s`,
-                    }}
-                  />
-
-                </svg>
-              );
-            }
-          )}
-
-        </div>
-
-
-        {/* PENSAMIENTOS REALES */}
-
-        {publicaciones
-          .slice(0, posiciones.length)
-          .map(
-            (
-              publicacion,
-              index
-            ) => {
-
-              const posicion =
-                posiciones[
-                  index %
-                  posiciones.length
-                ];
-
-              const nivel =
-                energia(
-                  publicacion
-                );
-
-              const size =
-                tamaño(
-                  publicacion
-                );
-
-              return (
-                <button
-                  key={
-                    publicacion.id
-                  }
-                  className={`nodo ${nivel}`}
-                  style={{
-                    left:
-                      `${posicion.x}%`,
-                    top:
-                      `${posicion.y}%`,
-                    "--size":
-                      `${size}px`,
-                    "--delay":
-                      `${index * .5}s`,
-                  }}
-                  onClick={() =>
-                    abrirPensamiento(
-                      publicacion,
-                      index
-                    )
-                  }
-                  aria-label={
-                    `Abrir pensamiento de ${
-                      publicacion.nombre
-                    }`
-                  }
-                >
-
-                  <div className="nodoLuz">
-                    ◉
-                  </div>
-
-                  <span>
-                    {publicacion.nombre}
-                  </span>
-
-                </button>
-              );
-            }
-          )}
-
-
-        {/* ORIGEN */}
-
-        <button
-          className="origen"
-          onClick={
-            cerrarPensamiento
-          }
-          title="Volver al origen"
-        >
-
-          <div className="brujula">
-
-            <span className="direccion arriba">
-              ·
-            </span>
-
-            <span className="direccion abajo">
-              ·
-            </span>
-
-            <span className="direccion izquierda">
-              ·
-            </span>
-
-            <span className="direccion derecha">
-              ·
-            </span>
-
-            <div className="origenLuz">
-              ◎
+        {nodos.map((nodo, index) => (
+          <div
+            key={index}
+            className={`node node-${index + 1} ${nodo.size}`}
+          >
+            <div className="node-light">
+              <span>•</span>
             </div>
 
+            <label>{nodo.nombre}</label>
           </div>
+        ))}
 
-          <small>
-            ORIGEN
-          </small>
-
-        </button>
-
+        <div className="connection connection-1" />
+        <div className="connection connection-2" />
+        <div className="connection connection-3" />
+        <div className="connection connection-4" />
       </section>
 
+      <section className="flow">
+        <div className="flow-header">
+          <span>FLUJO DEL NEXO</span>
+          <span>{publicaciones.length}</span>
+        </div>
 
-      {/* PENSAMIENTO ABIERTO */}
-
-      {seleccionado && (
-
-        <section className="panel">
-
-          <div className="panelTop">
-
-            <span>
-              PENSAMIENTO
-            </span>
-
-            <button
-              onClick={
-                cerrarPensamiento
-              }
-            >
-              ×
-            </button>
-
-          </div>
-
-
-          <div
-            className={`panelLuz ${
-              energia(
-                seleccionado
-              )
-            }`}
-          >
-            ◉
-          </div>
-
-
-          <small className="autor">
-            ◉{" "}
-            {seleccionado.nombre}
-          </small>
-
-
-          <p className="pensamiento">
-            {seleccionado.texto}
-          </p>
-
-
-          <div className="energia">
-
-            <span>
-              ✦
-            </span>
-
-            <strong>
-              {
-                totalReacciones(
-                  seleccionado
-                )
-              }
-            </strong>
-
-            <small>
-              conexiones
-            </small>
-
-          </div>
-
-
-          <div className="accionesPanel">
-
-            <button
-              onClick={
-                reaccionar
-              }
-              className={
-                reaccionando
-                  ? "reaccionando"
-                  : ""
-              }
-            >
-              ✦ REACCIONAR
-            </button>
-
-            <button>
-              ∞ CONECTAR
-            </button>
-
-          </div>
-
-        </section>
-
-      )}
-
-
-      {/* FLUJO */}
-
-      {!seleccionado && (
-
-        <section className="flujo">
-
-          <div className="titulo">
-
-            <span>
-              FLUJO DEL NEXO
-            </span>
-
-            <small>
-              {publicaciones.length}
-            </small>
-
-          </div>
-
-
-          {publicaciones.length === 0 ? (
-
-            <div className="vacio">
-
-              <div>
-                ◉
+        <div className="posts">
+          {publicaciones.map((publicacion) => (
+            <article className="post" key={publicacion.id}>
+              <div className="post-user">
+                ◉ {publicacion.usuario}
               </div>
 
-              <p>
-                El nexo está esperando
-                <br />
-                tu primera conexión.
-              </p>
+              <div className="post-text">
+                {publicacion.texto}
+              </div>
 
-              <Link href="/crear">
-                CREAR PENSAMIENTO
-              </Link>
+              <button
+                className="reaction"
+                onClick={() => reaccionar(publicacion.id)}
+              >
+                ✦ {publicacion.reacciones}
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
 
-            </div>
-
-          ) : (
-
-            <div className="lista">
-
-              {publicaciones
-                .slice(0, 5)
-                .map(
-                  (
-                    publicacion
-                  ) => (
-
-                    <article
-                      key={
-                        publicacion.id
-                      }
-                    >
-
-                      <small>
-                        ◉{" "}
-                        {
-                          publicacion.nombre
-                        }
-                      </small>
-
-                      <p>
-                        {
-                          publicacion.texto
-                        }
-                      </p>
-
-                      <div className="reacciones">
-
-                        {typeof publicacion.reacciones ===
-                        "number" ? (
-
-                          <span>
-                            ✦{" "}
-                            {
-                              publicacion.reacciones
-                            }
-                          </span>
-
-                        ) : (
-
-                          Object.entries(
-                            publicacion.reacciones ||
-                              {}
-                          ).map(
-                            (
-                              [
-                                simbolo,
-                                cantidad,
-                              ]
-                            ) => (
-
-                              <span
-                                key={
-                                  simbolo
-                                }
-                              >
-                                {simbolo}{" "}
-                                {cantidad}
-                              </span>
-
-                            )
-                          )
-
-                        )}
-
-                      </div>
-
-                    </article>
-
-                  )
-                )}
-
-            </div>
-
-          )}
-
-        </section>
-
-      )}
-
-
-      {/* CREAR */}
-
-      <Link
-        href="/crear"
-        className="botonFlotante crear"
-        title="Crear pensamiento"
-      >
-        ＋
-      </Link>
-
-
-      {/* EXPLORAR */}
-
-      <Link
-        href="/explorar"
-        className="botonFlotante explorar"
-        title="Explorar"
-      >
-        ✦
-      </Link>
-
-
-      {/* PERFIL */}
-
-      <Link
-        href="/perfil"
-        className="botonFlotante perfilFlotante"
-        title="Perfil"
-      >
-        ◉
-      </Link>
-
+      <div className="corner-symbol">
+        + ◇ ●
+      </div>
 
       <style jsx>{`
-
         * {
           box-sizing: border-box;
         }
 
-        .nexo {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  height: auto;
-  background:
-    radial-gradient(
-      circle at 50% 25%,
-      #20202a 0%,
-      #08080c 45%,
-      #000 100%
-    );
-  color: white;
-  font-family: Arial, sans-serif;
-  padding-bottom: 160px;
-  overflow-x: hidden;
-}
-/* HEADER */
+        .nexo-page {
+          min-height: 100vh;
+          background:
+            radial-gradient(
+              circle at 50% 38%,
+              rgba(255, 255, 255, 0.08),
+              transparent 24%
+            ),
+            radial-gradient(
+              circle at 50% 42%,
+              rgba(100, 100, 255, 0.09),
+              transparent 42%
+            ),
+            #09090d;
+          color: #fff;
+          overflow-x: hidden;
+          padding-bottom: 100px;
+        }
 
-        .header {
-          height: 65px;
-          padding: 0 22px;
-          border-bottom: 1px solid #222;
+        .topbar {
+          height: 74px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
           display: flex;
           align-items: center;
           justify-content: space-between;
+          padding: 0 28px;
         }
 
-        .marca {
-          color: white;
-          text-decoration: none;
-          font-size: 14px;
-          letter-spacing: 5px;
+        .logo {
+          font-size: 15px;
+          letter-spacing: 0.02em;
         }
 
-        .perfil {
-          color: white;
-          text-decoration: none;
-          opacity: .6;
-          font-size: 20px;
+        .origin-mini {
+          font-size: 18px;
+          opacity: 0.9;
         }
 
-
-        /* BIENVENIDA */
-
-        .bienvenida {
+        .intro {
           text-align: center;
-          padding: 28px 20px 0;
+          padding-top: 62px;
+          position: relative;
+          z-index: 5;
         }
 
-        .bienvenida span {
+        .eyebrow {
           font-size: 9px;
-          letter-spacing: 4px;
-          opacity: .35;
+          letter-spacing: 0.55em;
+          opacity: 0.45;
+          margin-bottom: 22px;
         }
 
-        .bienvenida h1 {
-          margin: 12px 0 0;
-          font-size: 25px;
+        .intro h1 {
+          margin: 0;
+          font-size: clamp(34px, 5vw, 54px);
           font-weight: 300;
-          letter-spacing: 3px;
+          letter-spacing: 0.08em;
         }
 
-        .bienvenida p {
-          font-size: 12px;
-          opacity: .4;
+        .intro p {
+          margin-top: 16px;
+          color: rgba(255, 255, 255, 0.45);
+          font-size: 16px;
         }
 
+        .cosmos {
+          width: min(820px, 94vw);
+          aspect-ratio: 1;
+          margin: 5px auto 0;
+          position: relative;
+        }
 
-        /* GALAXIA */
-
-        .galaxia {
-  position: relative;
-  width: min(90vw, 540px);
-  height: min(90vw, 540px);
-  margin: 8px auto 50px;
-  border-radius: 50%;
-}
-
-        .orbita {
+        .orbit {
           position: absolute;
           left: 50%;
           top: 50%;
-          transform:
-            translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 50%;
-          border:
-            1px solid
-            rgba(255,255,255,.07);
         }
 
-        .orbita1 {
+        .orbit-one {
+          width: 32%;
+          height: 32%;
+        }
+
+        .orbit-two {
+          width: 57%;
+          height: 57%;
+        }
+
+        .orbit-three {
+          width: 82%;
+          height: 82%;
+        }
+
+        .origin {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          z-index: 4;
+        }
+
+        .origin-core {
+          width: clamp(82px, 12vw, 130px);
+          height: clamp(82px, 12vw, 130px);
+          border-radius: 50%;
+          background: #fff;
+          color: #111;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 25px;
+          box-shadow:
+            0 0 20px rgba(255, 255, 255, 0.75),
+            0 0 70px rgba(255, 255, 255, 0.28);
+        }
+
+        .origin span {
+          margin-top: 13px;
+          font-size: 9px;
+          letter-spacing: 0.5em;
+          margin-left: 0.5em;
+          opacity: 0.65;
+        }
+
+        .node {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          z-index: 5;
+        }
+
+        .node-light {
+          border-radius: 50%;
+          background: #fff;
+          color: #111;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow:
+            0 0 22px rgba(255, 255, 255, 0.75),
+            0 0 50px rgba(255, 255, 255, 0.2);
+        }
+
+        .node-light span {
+          font-size: 12px;
+        }
+
+        .node label {
+          margin-top: 9px;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.55);
+          white-space: nowrap;
+        }
+
+        .node.small .node-light {
+          width: 58px;
+          height: 58px;
+        }
+
+        .node.medium .node-light {
+          width: 76px;
+          height: 76px;
+        }
+
+        .node.large .node-light {
+          width: 94px;
+          height: 94px;
+        }
+
+        .node-1 {
+          top: 12%;
+          left: 37%;
+        }
+
+        .node-2 {
+          top: 12%;
+          right: 30%;
+        }
+
+        .node-3 {
+          top: 24%;
+          right: 8%;
+        }
+
+        .node-4 {
+          top: 48%;
+          right: 0%;
+        }
+
+        .node-5 {
+          bottom: 31%;
+          right: 8%;
+        }
+
+        .node-6 {
+          bottom: 23%;
+          left: 11%;
+        }
+
+        .node-7 {
+          bottom: 11%;
+          left: 28%;
+        }
+
+        .node-8 {
+          bottom: 11%;
+          right: 29%;
+        }
+
+        .node-9 {
+          bottom: 22%;
+          right: 8%;
+        }
+
+        .connection {
+          position: absolute;
+          left: 50%;
+          top: 50%;
           width: 40%;
-          height: 40%;
-          animation:
-            girar 20s linear infinite;
-        }
-
-        .orbita2 {
-          width: 66%;
-          height: 66%;
-          animation:
-            girar 32s linear infinite reverse;
-        }
-
-        .orbita3 {
-          width: 92%;
-          height: 92%;
-          border-color:
-            rgba(255,255,255,.035);
-          animation:
-            girar 48s linear infinite;
-        }
-
-
-        /* ESTRELLAS */
-
-        .estrellas {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          overflow: hidden;
-        }
-
-        .estrellas i {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          opacity: .2;
-          animation:
-            estrella 3s ease-in-out infinite;
-        }
-
-
-        /* LINEAS */
-
-        .lineas {
-          position: absolute;
-          inset: 0;
+          height: 1px;
+          border-top: 1px dashed rgba(255, 255, 255, 0.22);
+          transform-origin: left center;
           z-index: 1;
         }
 
-        .lineas svg {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
+        .connection-1 {
+          transform: rotate(-135deg);
         }
 
-        .lineas line {
-          stroke:
-            rgba(255,255,255,.2);
-          stroke-width: .3;
-          stroke-dasharray: 1 2;
-          animation:
-            linea 3s ease-in-out infinite;
+        .connection-2 {
+          transform: rotate(-45deg);
         }
 
+        .connection-3 {
+          transform: rotate(0deg);
+        }
 
-        /* NODOS */
+        .connection-4 {
+          transform: rotate(135deg);
+        }
 
-        .nodo {
-          position: absolute;
-          width: 78px;
-          height: 78px;
-          transform:
-            translate(-50%, -50%);
-          border: 0;
-          background: transparent;
-          color: white;
-          z-index: 5;
-          cursor: pointer;
+        .flow {
+          width: min(760px, calc(100% - 40px));
+          margin: 10px auto 0;
+        }
+
+        .flow-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 10px;
+          letter-spacing: 0.45em;
+          margin-bottom: 20px;
+        }
+
+        .flow-header span:last-child {
+          letter-spacing: normal;
+        }
+
+        .posts {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          animation:
-            flotar 4s ease-in-out infinite;
-          animation-delay:
-            var(--delay);
+          gap: 12px;
         }
 
-        .nodoLuz {
-          width: var(--size);
-          height: var(--size);
-          min-width: 34px;
-          min-height: 34px;
-          border-radius: 50%;
-          background: white;
-          color: black;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .post {
+          border: 1px solid rgba(255, 255, 255, 0.09);
+          border-radius: 22px;
+          padding: 27px 30px;
+          background: rgba(255, 255, 255, 0.018);
+          transition: 0.25s ease;
+        }
+
+        .post:hover {
+          background: rgba(255, 255, 255, 0.035);
+          border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        .post-user {
           font-size: 11px;
-          transition: .5s ease;
+          color: rgba(255, 255, 255, 0.42);
+          margin-bottom: 24px;
         }
 
-        .nodo.baja .nodoLuz {
-          box-shadow:
-            0 0 12px white,
-            0 0 28px
-            rgba(255,255,255,.3);
-        }
-
-        .nodo.media .nodoLuz {
-          box-shadow:
-            0 0 20px white,
-            0 0 50px
-            rgba(180,195,255,.5);
-        }
-
-        .nodo.alta .nodoLuz {
-          box-shadow:
-            0 0 30px white,
-            0 0 70px
-            rgba(220,225,255,.8),
-            0 0 110px
-            rgba(255,255,255,.25);
-        }
-
-        .nodo:hover .nodoLuz {
-          transform: scale(1.12);
-        }
-
-        .nodo span {
-          font-size: 9px;
-          opacity: .5;
-          white-space: nowrap;
-          max-width: 90px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-
-        /* ORIGEN */
-
-        .origen {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform:
-            translate(-50%, -50%);
-          width: 110px;
-          height: 110px;
-          background: transparent;
-          border: 0;
-          color: white;
-          z-index: 8;
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .brujula {
-          position: relative;
-          width: 84px;
-          height: 84px;
-          border:
-            1px solid
-            rgba(255,255,255,.25);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation:
-            brujula 15s linear infinite;
-        }
-
-        .origenLuz {
-          width: 58px;
-          height: 58px;
-          border-radius: 50%;
-          background: white;
-          color: black;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          box-shadow:
-            0 0 25px white,
-            0 0 60px
-            rgba(255,255,255,.5);
-          animation:
-            respirar 3.5s ease-in-out infinite;
-        }
-
-        .direccion {
-          position: absolute;
+        .post-text {
           font-size: 20px;
+          font-weight: 300;
+          margin-bottom: 25px;
         }
 
-        .arriba {
-          top: -14px;
-        }
-
-        .abajo {
-          bottom: -14px;
-        }
-
-        .izquierda {
-          left: -10px;
-        }
-
-        .derecha {
-          right: -10px;
-        }
-
-        .origen small {
-          margin-top: 10px;
-          font-size: 8px;
-          letter-spacing: 3px;
-          opacity: .5;
-        }
-
-
-        /* PANEL */
-
-        .panel {
-          width: min(90%, 500px);
-          margin: -5px auto 35px;
-          padding: 24px;
-          border:
-            1px solid #292929;
-          border-radius: 24px;
-          background:
-            rgba(255,255,255,.035);
-          text-align: center;
-          animation:
-            aparecer .5s ease;
-        }
-
-        .panelTop {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 9px;
-          letter-spacing: 3px;
-          opacity: .4;
-        }
-
-        .panelTop button {
+        .reaction {
           border: 0;
           background: transparent;
-          color: white;
-          font-size: 24px;
+          color: rgba(255, 255, 255, 0.42);
+          padding: 0;
           cursor: pointer;
-        }
-
-        .panelLuz {
-          width: 65px;
-          height: 65px;
-          margin: 20px auto;
-          border-radius: 50%;
-          background: white;
-          color: black;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow:
-            0 0 25px white;
-        }
-
-        .panelLuz.media {
-          box-shadow:
-            0 0 25px white,
-            0 0 55px
-            rgba(180,195,255,.5);
-        }
-
-        .panelLuz.alta {
-          box-shadow:
-            0 0 30px white,
-            0 0 80px
-            rgba(210,220,255,.7);
-        }
-
-        .autor {
-          font-size: 10px;
-          opacity: .45;
-          letter-spacing: 1px;
-        }
-
-        .pensamiento {
-          margin: 22px auto;
-          max-width: 430px;
-          font-size: 19px;
-          line-height: 1.55;
-        }
-
-        .energia {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 9px 16px;
-          border:
-            1px solid #333;
-          border-radius: 30px;
-          font-size: 11px;
-        }
-
-        .energia small {
-          opacity: .45;
-        }
-
-        .accionesPanel {
-          display: flex;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .accionesPanel button {
-          flex: 1;
-          padding: 12px;
-          border:
-            1px solid #333;
-          border-radius: 25px;
-          background: transparent;
-          color: white;
-          font-size: 9px;
-          letter-spacing: 1px;
-          cursor: pointer;
-        }
-
-        .accionesPanel button:first-child {
-          border-color:
-            rgba(255,255,255,.5);
-        }
-
-        .accionesPanel .reaccionando {
-          transform: scale(.92);
-          background: white;
-          color: black;
-        }
-
-
-        /* FLUJO */
-
-        .flujo {
-          width: min(92%, 600px);
-          margin: auto;
-        }
-
-        .titulo {
-          display: flex;
-          justify-content: space-between;
-          font-size: 10px;
-          letter-spacing: 3px;
-          opacity: .6;
-          margin-bottom: 12px;
-        }
-
-        .titulo small {
-          letter-spacing: 0;
-        }
-
-        .vacio {
-          padding: 35px 20px;
-          border:
-            1px solid #222;
-          border-radius: 20px;
-          text-align: center;
-        }
-
-        .vacio > div {
-          width: 42px;
-          height: 42px;
-          margin: auto;
-          border-radius: 50%;
-          background: white;
-          color: black;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow:
-            0 0 25px
-            rgba(255,255,255,.5);
-        }
-
-        .vacio p {
           font-size: 12px;
-          line-height: 1.6;
-          opacity: .4;
         }
 
-        .vacio a {
-          display: inline-block;
-          padding: 10px 16px;
-          border:
-            1px solid #444;
-          border-radius: 25px;
-          color: white;
-          text-decoration: none;
-          font-size: 8px;
+        .reaction:hover {
+          color: #fff;
+        }
+
+        .corner-symbol {
+          position: fixed;
+          left: 14px;
+          bottom: 80px;
+          font-size: 13px;
+          opacity: 0.65;
           letter-spacing: 2px;
         }
 
-        .lista {
-          display: flex;
-          flex-direction: column;
-          gap: 9px;
+        @media (max-width: 600px) {
+          .topbar {
+            height: 62px;
+            padding: 0 17px;
+          }
+
+          .intro {
+            padding-top: 46px;
+          }
+
+          .intro h1 {
+            font-size: 38px;
+          }
+
+          .intro p {
+            font-size: 15px;
+          }
+
+          .cosmos {
+            width: 108vw;
+            margin-left: -4vw;
+            margin-top: 0;
+          }
+
+          .node.small .node-light {
+            width: 48px;
+            height: 48px;
+          }
+
+          .node.medium .node-light {
+            width: 64px;
+            height: 64px;
+          }
+
+          .node.large .node-light {
+            width: 78px;
+            height: 78px;
+          }
+
+          .node label {
+            font-size: 11px;
+          }
+
+          .flow {
+            width: calc(100% - 28px);
+            margin-top: 0;
+          }
+
+          .post {
+            border-radius: 19px;
+            padding: 24px 20px;
+          }
+
+          .post-text {
+            font-size: 19px;
+          }
+
+          .flow-header {
+            letter-spacing: 0.32em;
+          }
         }
 
-        .lista article {
-          padding: 17px;
-          border:
-            1px solid #222;
-          border-radius: 17px;
-          background:
-            rgba(255,255,255,.025);
+        @media (min-width: 1000px) {
+          .cosmos {
+            margin-top: -5px;
+          }
+
+          .flow {
+            margin-top: -15px;
+          }
         }
-
-        .lista article > small {
-          opacity: .4;
-          font-size: 9px;
-        }
-
-        .lista article p {
-          font-size: 15px;
-          line-height: 1.45;
-        }
-
-        .reacciones {
-          display: flex;
-          gap: 13px;
-          font-size: 9px;
-          opacity: .35;
-        }
-
-
-        /* BOTONES */
-
-.botonFlotante {
-  position: fixed;
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 50%;
-  background: rgba(5,5,5,.78);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: white;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 21px;
-  z-index: 50;
-  transition: .3s ease;
-}
-
-.botonFlotante:hover {
-  border-color: white;
-  box-shadow:
-    0 0 20px rgba(255,255,255,.2);
-}
-
-.crear {
-  left: 22px;
-  bottom: 28px;
-}
-
-.explorar {
-  right: 22px;
-  bottom: 28px;
-}
-
-.perfilFlotante {
-  right: 22px;
-  top: 90px;
-}
-
-        /* ANIMACIONES */
-
-        @keyframes respirar {
-
-          0%,100% {
-            transform: scale(1);
-          }
-
-          50% {
-            transform: scale(1.1);
-          }
-
-        }
-
-        @keyframes flotar {
-
-          0%,100% {
-            transform:
-              translate(-50%, -50%);
-          }
-
-          50% {
-            transform:
-              translate(
-                -50%,
-                calc(-50% - 5px)
-              );
-          }
-
-        }
-
-        @keyframes girar {
-
-          from {
-            transform:
-              translate(-50%, -50%)
-              rotate(0deg);
-          }
-
-          to {
-            transform:
-              translate(-50%, -50%)
-              rotate(360deg);
-          }
-
-        }
-
-        @keyframes brujula {
-
-          from {
-            transform:
-              rotate(0deg);
-          }
-
-          to {
-            transform:
-              rotate(360deg);
-          }
-
-        }
-
-        @keyframes linea {
-
-          0%,100% {
-            opacity: .2;
-          }
-
-          50% {
-            opacity: .8;
-          }
-
-        }
-
-        @keyframes estrella {
-
-          0%,100% {
-            opacity: .15;
-            transform: scale(1);
-          }
-
-          50% {
-            opacity: .7;
-            transform: scale(1.7);
-          }
-
-        }
-
-               @keyframes aparecer {
-
-          from {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-
-        }
-
-
-        /* CELULAR */
-
-        @media (max-width: 500px) {
-
-          .nexo {
-            width: 100%;
-            min-height: 100vh;
-            height: auto;
-            padding-bottom: 180px;
-            overflow-x: hidden;
-          }
-
-          .galaxia {
-            width: 94vw;
-            height: 94vw;
-            margin: 8px auto 50px;
-          }
-
-          .flujo {
-            width: calc(100% - 30px);
-            margin: 0 auto;
-            padding-bottom: 60px;
-          }
-
-          .lista {
-            width: 100%;
-          }
-
-          .lista article {
-            width: 100%;
-          }
-
-          .botonFlotante {
-            width: 46px;
-            height: 46px;
-          }
-
-          .crear {
-            left: 16px;
-            bottom: 18px;
-          }
-
-          .explorar {
-            right: 16px;
-            bottom: 18px;
-          }
-
-          .perfilFlotante {
-            right: 16px;
-            top: 78px;
-          }
-
-        }
-
-      `}</style>
-
+      `}
+      </style>
     </main>
   );
 }
